@@ -11,10 +11,11 @@ function App() {
     <Router>
       <Routes>
 		
+    <Route path="/" element={<LandingPage />} />
 		<Route path="/auth" element={<AuthPage />} />
 		<Route path="/features" element={<Features />} />
 		<Route path="/about" element={<About />} />
-    <Route path="/" element={<HomePage />} />
+    <Route path="/home" element={<HomePage />} />
       </Routes>
     </Router>
   );
