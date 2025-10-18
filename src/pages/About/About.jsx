@@ -1,5 +1,5 @@
 import { Navigation } from "../../components/navigation/Navigation"; 
-
+import "./About.css"; 
 
 export function About() {
   return (
