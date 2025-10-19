@@ -1,0 +1,16 @@
+/* Import base layout */
+@import "./Signuppage.css";
+
+/* You can override text or spacing differences here if you want */
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.subtitle {
+  color: #555;
+}
+
+.auth-form {
+  margin-bottom: 0.5rem;
+}

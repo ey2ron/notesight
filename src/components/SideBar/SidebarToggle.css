@@ -1,0 +1,44 @@
+.toggle-btn {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.toggle-btn:hover {
+  background-color: #333;
+}
+
+/* Overlay when sidebar is open */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}
+
+/* Sidebar wrapper animation */
+.sidebar-wrapper {
+  position: fixed;
+  top: 0;
+  right: -300px; /* hidden by default */
+  width: 280px;
+  height: 100vh;
+  background-color: #fff;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+  transition: right 0.3s ease;
+  z-index: 1002;
+}
+
+.sidebar-wrapper.open {
+  right: 0; /* slides in */
+}
