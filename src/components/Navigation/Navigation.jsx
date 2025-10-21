@@ -5,7 +5,7 @@ export function Navigation() {
   return (
     <header className="navbar">
       <div className="logo-section">
-         <Link to="/" className="logo-text">NoteSight</Link>
+        <Link to="/" className="logo-text">NoteSight</Link>
       </div>
 
       <nav className="nav-links">
