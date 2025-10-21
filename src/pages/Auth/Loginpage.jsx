@@ -56,14 +56,14 @@ export function LoginPage() {
         <form onSubmit={handleLogin} className="auth-form">
           <input 
             type="email" 
-            classname ="form-control"
+            className="form-control"
             placeholder="Enter email"
             value={email}
             onChange={(e)=>setEmail(e.target.value)} 
             />
           <input 
             type="password"
-            classname ="form-control"
+            className="form-control"
             placeholder="Password"
             value={password}
             onChange={(e)=>setPassword(e.target.value)} 
