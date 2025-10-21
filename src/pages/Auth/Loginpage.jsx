@@ -1,26 +1,51 @@
 import "./Loginpage.css";
 import { FcGoogle } from "react-icons/fc";
 import { FiArrowRight } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "./firebase.jsx";
+import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { toast } from "react-toastify";
+import { auth, googleProvider } from "./firebase.jsx";
 
 
 export function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
         
         try {
             await signInWithEmailAndPassword(auth, email, password);
-            console.log("Logged in user:");
+            navigate("/home", { replace: true });
+      console.log("Logged in user:");
+      toast.success("Login successful!", {
+        position: "top-left",
+      });
         } catch (error) {
+            
             console.error("Error during login:", error.message);
+      toast.error(`Login failed: ${error.message}`, {
+        position: "top-left",
+      });
         }
     }
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      toast.success("Signed in with Google!", {
+        position: "top-left",
+      });
+      navigate("/home", { replace: true });
+    } catch (error) {
+      console.error("Google sign-in failed:", error.message);
+      toast.error(`Google sign-in failed: ${error.message}`, {
+        position: "top-left",
+      });
+    }
+  }
   return (
     <div className="auth-container">
       <div className="auth-left">
@@ -52,7 +77,7 @@ export function LoginPage() {
         </form>
 
         <p className="continue">Continue with</p>
-        <div className="google-btn">
+        <div className="google-btn" onClick={handleGoogleLogin} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && handleGoogleLogin()}>
           <FcGoogle size={28} />
         </div>
       </div>

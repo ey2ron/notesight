@@ -1,13 +1,12 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import "./SignupPage.css";
 import { FcGoogle } from "react-icons/fc";
 import { FiArrowRight } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { auth, db } from "./firebase.jsx";
+import { auth, db, googleProvider } from "./firebase.jsx";
 import { setDoc, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
-import { SidebarToggle } from "../../components/SideBar/SidebarToggle";
 
 export function SignupPage() {
   const [name, setName] = useState("");
@@ -15,6 +14,7 @@ export function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
+  const navigate = useNavigate();
 
   const handlerRegister = async (e) => {
     e.preventDefault();
@@ -53,11 +53,40 @@ export function SignupPage() {
       toast.success("Registration successful!", {
         position: "top-left",
       });
-
+  navigate("/home", { replace: true });
 
     } catch (error) {
       console.error("Error during registration:", error.message);
-      toast.success("Registration failed:", error.message, {
+      toast.error(`Registration failed: ${error.message}`, {
+        position: "top-left",
+      });
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+
+      if (user) {
+        await setDoc(
+          doc(db, "users", user.uid),
+          {
+            name: user.displayName || "",
+            username: user.displayName ? user.displayName.replace(/\s+/g, "").toLowerCase() : "",
+            email: user.email || "",
+          },
+          { merge: true }
+        );
+      }
+
+      toast.success("Signed in with Google!", {
+        position: "top-left",
+      });
+      navigate("/home", { replace: true });
+    } catch (error) {
+      console.error("Google sign-in failed:", error.message);
+      toast.error(`Google sign-in failed: ${error.message}`, {
         position: "top-left",
       });
     }
@@ -65,7 +94,6 @@ export function SignupPage() {
 
   return (
     <div className="auth-container">
-        <SidebarToggle />
       <div className="auth-left">
         <div className="logo">🎵</div>
         <h2>Are you new?</h2>
@@ -117,7 +145,7 @@ export function SignupPage() {
         </form>
 
         <p className="continue">Continue with</p>
-        <div className="google-btn">
+        <div className="google-btn" onClick={handleGoogleSignup} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && handleGoogleSignup()}>
           <FcGoogle size={28} />
         </div>
       </div>

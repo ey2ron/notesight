@@ -1,22 +1,12 @@
-import React, { useState } from "react";
-import { Sidebar } from "../../components/SideBar/SideBar";
+import { SidebarToggle } from "../../components/SideBar/SidebarToggle"
 
 export function HomePage() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
   return (
     <>
-      <header>
-        <button onClick={() => setSidebarOpen(true)} className="menu-btn">
-          ☰
-        </button>
-      </header>
-
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-      <main className="home-content">
-        <h1>Home Page</h1>
-      </main>
+      <SidebarToggle />
+      <div>
+        <h1>Welcome to the Home Page</h1>
+      </div>
     </>
-  );
+  )
 }

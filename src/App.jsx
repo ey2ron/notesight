@@ -6,6 +6,7 @@ import { Features } from './pages/Features/Features';
 import { About } from './pages/About/About';
 import { SignupPage } from './pages/Auth/Signuppage'; 
 import { LoginPage } from './pages/Auth/Loginpage';
+import { HomePage } from './pages/Home/HomePage';
 
 
 
@@ -13,11 +14,12 @@ function App() {
   return (
     <Router>
       <Routes>
-		    <Route path="/" element={<LandingPage />} />
-		    <Route path="/features" element={<Features />} />
-		    <Route path="/about" element={<About />} />
+	    <Route path="/" element={<LandingPage />} />
+	    <Route path="/features" element={<Features />} />
+	    <Route path="/about" element={<About />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/home" element={<HomePage />} />
       </Routes>
       <ToastContainer/>
     </Router>
