@@ -1,0 +1,30 @@
+/* Basic layout for Home page */
+.home-container {
+	padding: 2rem;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	align-items: flex-start;
+}
+
+/* Styled link that looks like a button */
+.xmlplayer-btn {
+	display: inline-block;
+	padding: 0.6rem 1rem;
+	background: #2563eb; /* blue */
+	color: white;
+	border-radius: 6px;
+	text-decoration: none;
+	font-weight: 600;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+	transition: transform 0.08s ease, background 0.12s ease;
+}
+
+.xmlplayer-btn:hover {
+	transform: translateY(-1px);
+	background: #1e40af;
+}
+
+.xmlplayer-btn:active {
+	transform: translateY(0);
+}
