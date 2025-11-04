@@ -1,5 +1,5 @@
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
-import "./SignupPage.css";
+import "./Signuppage.css";
 import { FcGoogle } from "react-icons/fc";
 import { FiArrowRight } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
