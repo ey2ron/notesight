@@ -1,7 +1,14 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay";
+import JSZip from "jszip";
 import Soundfont from "soundfont-player";
 import "./XMLPlayer.css";
+
+// Expose JSZip globally so OSMD can unpack compressed .mxl scores.
+if (typeof window !== "undefined" && !window.JSZip) {
+  window.JSZip = JSZip;
+}
 
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
@@ -22,6 +29,8 @@ export function XMLPlayerPage() {
   const [bpm, setBpm] = useState(120);
   const [instrumentName, setInstrumentName] = useState("acoustic_grand_piano");
 
+  const location = useLocation();
+  const navigate = useNavigate();
   const containerRef = useRef(null);
   const osmdRef = useRef(null);
   const audioContextRef = useRef(null);
@@ -186,6 +195,50 @@ export function XMLPlayerPage() {
     [bpm, clearMeasureHighlight, ensureAudioContextRunning, ensureInstrumentReady, findMeasureElementFromNode, midiToNoteName, moveCursorToTimestamp, stopPlayback]
   );
 
+  const readMusicXmlFromMxl = useCallback(async (arrayBuffer) => {
+    const zip = await JSZip.loadAsync(arrayBuffer);
+
+    const resolveRootFile = async () => {
+      const containerEntry = zip.file("META-INF/container.xml");
+      if (!containerEntry) {
+        return null;
+      }
+
+      try {
+        const containerXml = await containerEntry.async("string");
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(containerXml, "application/xml");
+        const rootfileEl = doc.querySelector("rootfile");
+        const fullPath = rootfileEl?.getAttribute("full-path");
+        if (fullPath) {
+          return zip.file(fullPath);
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn("Failed to parse META-INF/container.xml", error);
+      }
+
+      return null;
+    };
+
+    let xmlEntry = await resolveRootFile();
+
+    if (!xmlEntry) {
+      const fallbackCandidates = zip
+        .file(/\.(musicxml|xml)$/i)
+        .filter((entry) => !entry.name.toLowerCase().startsWith("meta-inf/"));
+      if (fallbackCandidates.length > 0) {
+        xmlEntry = fallbackCandidates[0];
+      }
+    }
+
+    if (!xmlEntry) {
+      throw new Error("No MusicXML document found inside the .mxl archive.");
+    }
+
+    return xmlEntry.async("string");
+  }, []);
+
   const attachNoteClickHandlers = useCallback(() => {
     noteElementDataRef.current = new WeakMap();
     const osmd = osmdRef.current;
@@ -248,51 +301,84 @@ export function XMLPlayerPage() {
     }
   }, [findMeasureElementFromNode, handleNoteClick]);
 
+  const loadScoreFile = useCallback(
+    async (file) => {
+      if (!file || !containerRef.current) {
+        return false;
+      }
+
+      const fileName = (file.name || "").toLowerCase();
+      const isCompressedMusicXml = fileName.endsWith(".mxl");
+      const isPlainMusicXml = fileName.endsWith(".musicxml") || fileName.endsWith(".xml");
+
+      if (!isCompressedMusicXml && !isPlainMusicXml) {
+        alert("Unsupported file format. Please choose a .musicxml, .xml, or .mxl file.");
+        return false;
+      }
+
+      stopPlayback();
+      noteElementDataRef.current = new WeakMap();
+
+      let musicXmlContent = "";
+      try {
+        if (isCompressedMusicXml) {
+          const arrayBuffer = await file.arrayBuffer();
+          musicXmlContent = await readMusicXmlFromMxl(arrayBuffer);
+        } else {
+          musicXmlContent = await file.text();
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        // eslint-disable-next-line no-console
+        console.error("Failed to unpack MusicXML", err);
+        alert(`Unable to read MusicXML: ${message}`);
+        return false;
+      }
+
+      if (!osmdRef.current) {
+        osmdRef.current = new OpenSheetMusicDisplay(containerRef.current, {
+          drawTitle: true,
+          drawPartNames: true,
+          drawFingerings: true,
+          drawMeasureNumbers: true,
+          drawSubtitle: true,
+          followCursor: true
+        });
+      } else {
+        osmdRef.current.clear();
+      }
+
+      try {
+        await osmdRef.current.load(musicXmlContent);
+        osmdRef.current.render();
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        // eslint-disable-next-line no-console
+        console.error("Failed to load MusicXML", err);
+        alert(`Unable to load MusicXML: ${message}`);
+        return false;
+      }
+
+      attachNoteClickHandlers();
+      stopPlayback();
+      lastCursorIndexRef.current = 0;
+      return true;
+    },
+    [attachNoteClickHandlers, readMusicXmlFromMxl, stopPlayback]
+  );
+
   const handleFileChange = useCallback(
     async (event) => {
-      const file = event.target.files?.[0];
-      if (!file || !containerRef.current) {
+      const inputElement = event.target;
+      const file = inputElement.files?.[0];
+      if (!file) {
         return;
       }
 
-      const reader = new FileReader();
-      reader.onload = async (e) => {
-        let content = e.target?.result;
-        if (!content) {
-          return;
-        }
-
-        if (file.name.endsWith(".mxl")) {
-          content = new Uint8Array(content);
-        }
-
-        if (!osmdRef.current) {
-          osmdRef.current = new OpenSheetMusicDisplay(containerRef.current, {
-            drawTitle: true,
-            drawPartNames: true,
-            drawFingerings: true,
-            drawMeasureNumbers: true,
-            drawSubtitle: true,
-            followCursor: true
-          });
-        } else {
-          osmdRef.current.clear();
-        }
-
-        await osmdRef.current.load(content);
-        osmdRef.current.render();
-        attachNoteClickHandlers();
-        stopPlayback();
-        lastCursorIndexRef.current = 0;
-      };
-
-      if (file.name.endsWith(".mxl")) {
-        reader.readAsArrayBuffer(file);
-      } else {
-        reader.readAsText(file);
-      }
+      await loadScoreFile(file);
+      inputElement.value = "";
     },
-    [attachNoteClickHandlers, stopPlayback]
+    [loadScoreFile]
   );
 
   const handlePlay = useCallback(async () => {
@@ -388,6 +474,36 @@ export function XMLPlayerPage() {
       });
     };
   }, [handleNoteClick]);
+
+  useEffect(() => {
+    const navState = location.state;
+    if (!navState || !navState.scoreBlob) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const openFromNavigation = async () => {
+      try {
+        const blob = navState.scoreBlob;
+        const providedName = typeof navState.fileName === "string" && navState.fileName.trim() ? navState.fileName : "audiveris-output.mxl";
+        const lowerName = providedName.toLowerCase();
+        const inferredType = blob?.type || (lowerName.endsWith(".mxl") ? "application/vnd.recordare.musicxml+xml" : "application/xml");
+        const file = new File([blob], providedName, { type: inferredType });
+        await loadScoreFile(file);
+      } finally {
+        if (!cancelled) {
+          navigate(location.pathname, { replace: true, state: null });
+        }
+      }
+    };
+
+    openFromNavigation();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname, location.state, loadScoreFile, navigate]);
 
   return (
     <div className="app">
