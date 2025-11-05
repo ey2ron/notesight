@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './OMRUpload.css';
 
@@ -12,6 +12,10 @@ export function OMRUpload() {
   const [downloadFileName, setDownloadFileName] = useState('audiveris-output.mxl');
   const [infoMessage, setInfoMessage] = useState('');
   const navigate = useNavigate();
+  const apiBaseUrl = useMemo(() => {
+    const raw = import.meta.env.VITE_API_URL ?? 'https://lophodont-conjugally-nathanial.ngrok-free.dev';
+    return raw.endsWith('/') ? raw.slice(0, -1) : raw;
+  }, []);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files?.[0] ?? null);
@@ -48,7 +52,7 @@ export function OMRUpload() {
     setInfoMessage('');
 
     try {
-      const response = await fetch('http://localhost:8080/convert', {
+      const response = await fetch(`${apiBaseUrl}/convert`, {
         method: 'POST',
         body: formData,
       });

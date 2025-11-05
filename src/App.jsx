@@ -19,8 +19,8 @@ function App() {
 	    <Route path="/" element={<LandingPage />} />
 	    <Route path="/features" element={<Features />} />
 	    <Route path="/about" element={<About />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginPage />} />
+      <Route path="/signup" element={<SignupPage />} />
+  <Route path="/login" element={<LoginPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/xmlplayer" element={<XMLPlayerPage />} />
         <Route path="/omr" element={<OMRUpload />} />
