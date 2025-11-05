@@ -13,7 +13,10 @@ export function OMRUpload() {
   const [infoMessage, setInfoMessage] = useState('');
   const navigate = useNavigate();
   const apiBaseUrl = useMemo(() => {
-    const raw = import.meta.env.VITE_API_URL ?? 'https://lophodont-conjugally-nathanial.ngrok-free.dev';
+    const fallback = import.meta.env.DEV
+      ? 'http://localhost:8080'
+      : 'https://lophodont-conjugally-nathanial.ngrok-free.dev';
+    const raw = import.meta.env.VITE_API_URL ?? fallback;
     return raw.endsWith('/') ? raw.slice(0, -1) : raw;
   }, []);
 
