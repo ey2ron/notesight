@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: notesight-omr-backend
+    env: java
+    region: oregon
+    plan: free
+    buildCommand: ./render-build.sh
+    startCommand: java -jar omr-backend/target/omr-backend-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: "21"
+      - key: FRONTEND_ORIGIN
+        sync: false
+      - key: AUDIVERIS_LIB_DIR
+        value: audiveris/app/build/install/app/lib
+      - key: AUDIVERIS_TESSDATA_DIR
+        value: audiveris/app/dev/tessdata
+      - key: STORAGE_UPLOAD_DIR
+        value: storage/uploads
+      - key: STORAGE_OUTPUT_DIR
+        value: storage/results
+      - key: AUDIVERIS_JVM_ARGS
+        value: "-Xmx2G --enable-native-access=ALL-UNNAMED"
+    disks:
+      - name: omr-storage
+        mountPath: /opt/render/project/src/omr-backend/storage
+        sizeGB: 2
