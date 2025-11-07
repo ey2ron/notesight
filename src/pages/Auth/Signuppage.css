@@ -13,43 +13,54 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 3rem 2.5rem;
 }
 
 .logo {
-  font-size: 3rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.8rem;
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.logo img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 2.1rem;
   font-weight: 600;
+  margin-bottom: 0.35rem;
 }
 
 .subtitle {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 1.5rem;
+  font-size: 1.05rem;
+  color: #666;
+  margin-bottom: 2.25rem;
 }
 
 .auth-form {
-  width: 80%;
+  width: 85%;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 1.15rem;
 }
 
 .auth-form input {
-  padding: 0.6rem;
+  padding: 1.05rem 1.15rem;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 12px;
   outline: none;
-  font-size: 0.9rem;
-  transition: border 0.3s ease;
+  font-size: 1rem;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
 }
 
 .auth-form input:focus {
   border-color: #000;
+  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
 }
 
 .redirect {
@@ -73,15 +84,25 @@ h2 {
   background: #000;
   color: #fff;
   border: none;
-  border-radius: 50%;
-  padding: 0.8rem;
+  border-radius: 999px;
+  padding: 0.95rem 2.5rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   align-self: center;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.3s ease;
 }
 
 .auth-btn:hover {
   background: #333;
+  transform: translateY(-2px);
+}
+
+.auth-btn svg {
+  width: 1.4rem;
+  height: 1.4rem;
+  stroke-width: 3;
 }
 
 .continue {
@@ -98,37 +119,48 @@ h2 {
 /* Right side (features) */
 .auth-right {
   width: 50%;
-  background: linear-gradient(to bottom right, #2d2d2d, #1a1a1a);
+  background: linear-gradient(to bottom right, #2d2d2d, #0f0f0f);
   color: #fff;
   display: flex;
   justify-content: center;
   align-items: center;
+  padding: 0 3.5rem;
 }
 
 .auth-right ul {
   list-style: none;
   padding: 0;
+  margin: 0;
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
 }
 
 .auth-right li {
   display: flex;
   align-items: center;
-  margin: 1rem 0;
-  font-size: 0.9rem;
+  gap: 1.2rem;
+  font-size: 1.05rem;
 }
 
 .auth-right .icon {
-  display: inline-block;
-  background: #ccc;
-  color: #000;
-  border-radius: 5px;
-  width: 32px;
-  height: 32px;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 1rem;
-  font-size: 1.2rem;
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f6f6f6, #cfcfcf);
+  flex-shrink: 0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.auth-right .icon img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 
 /* -------------------- Responsive Design -------------------- */
@@ -148,15 +180,23 @@ h2 {
   }
 
   .auth-right {
-    padding: 2rem;
+    padding: 2.5rem 2rem;
   }
 
   .auth-right ul {
+    max-width: none;
     text-align: center;
   }
 
   .auth-right li {
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
+    text-align: center;
+  }
+
+  .auth-right .icon {
+    margin-bottom: 0.75rem;
   }
 }
 
@@ -166,7 +206,8 @@ h2 {
   }
 
   .auth-form input {
-    font-size: 0.85rem;
+    font-size: 0.95rem;
+    padding: 0.9rem 1rem;
   }
 
   h2 {
@@ -178,6 +219,6 @@ h2 {
   }
 
   .auth-btn {
-    padding: 0.6rem;
+    padding: 0.8rem;
   }
 }
