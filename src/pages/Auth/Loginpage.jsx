@@ -6,11 +6,11 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { toast } from "react-toastify";
 import { auth, googleProvider } from "./firebase.jsx";
-import MusicIcon from "../Features/assets/music.png";
-import InstantAudioPlaybackIcon from "../Features/assets/InstantAudioPlayback.png";
-import CuttingEdgeIcon from "../Features/assets/CuttingEdge.png";
-import InclusiveLearningIcon from "../Features/assets/InclusiveLearning.png";
-import AdjustableTempoIcon from "../Features/assets/AdjustableTempo.png";
+import MusicIcon from "./assets/home.png";
+import InstantAudioPlaybackIcon from "./assets/InstantAudioPlayback.png";
+import CuttingEdgeIcon from "./assets/CuttingEdge.png";
+import InclusiveLearningIcon from "./assets/InclusiveLearning.png";
+import AdjustableTempoIcon from "./assets/AdjustableTempo.png";
 
 
 export function LoginPage() {

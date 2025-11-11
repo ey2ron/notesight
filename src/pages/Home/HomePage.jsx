@@ -1,7 +1,7 @@
 import { SidebarToggle } from "../../components/SideBar/SidebarToggle"
 import { Link } from "react-router-dom"
 import "./HomePage.css"
-import HomeBg from "../Features/assets/home.png"
+import HomeBg from "../Auth/assets/home.png"
 
 export function HomePage() {
   return (
