@@ -6,6 +6,11 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { toast } from "react-toastify";
 import { auth, googleProvider } from "./firebase.jsx";
+import MusicIcon from "../Features/assets/music.png";
+import InstantAudioPlaybackIcon from "../Features/assets/InstantAudioPlayback.png";
+import CuttingEdgeIcon from "../Features/assets/CuttingEdge.png";
+import InclusiveLearningIcon from "../Features/assets/InclusiveLearning.png";
+import AdjustableTempoIcon from "../Features/assets/AdjustableTempo.png";
 
 
 export function LoginPage() {
@@ -49,7 +54,9 @@ export function LoginPage() {
   return (
     <div className="auth-container">
       <div className="auth-left">
-        <div className="logo">🎵</div>
+        <div className="logo">
+          <img src={MusicIcon} alt="Notesight logo" />
+        </div>
         <h2>Welcome back</h2>
         <p className="subtitle">Please enter your details</p>
 
@@ -85,16 +92,28 @@ export function LoginPage() {
       <div className="auth-right">
         <ul>
           <li>
-            <span className="icon">🎧</span> Instant Audio Playback
+            <span className="icon">
+              <img src={InstantAudioPlaybackIcon} alt="Instant Audio Playback icon" />
+            </span>
+            Instant Audio Playback
           </li>
           <li>
-            <span className="icon">🧠</span> Cutting-Edge OMR Technology
+            <span className="icon">
+              <img src={CuttingEdgeIcon} alt="Cutting-Edge OMR Technology icon" />
+            </span>
+            Cutting-Edge OMR Technology
           </li>
           <li>
-            <span className="icon">🎼</span> Inclusive Learning Tool
+            <span className="icon">
+              <img src={InclusiveLearningIcon} alt="Inclusive Learning Tool icon" />
+            </span>
+            Inclusive Learning Tool
           </li>
           <li>
-            <span className="icon">⏱️</span> Adjustable Tempo Control
+            <span className="icon">
+              <img src={AdjustableTempoIcon} alt="Adjustable Tempo Control icon" />
+            </span>
+            Adjustable Tempo Control
           </li>
         </ul>
       </div>
