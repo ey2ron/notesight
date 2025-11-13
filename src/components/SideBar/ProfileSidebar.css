@@ -3,9 +3,10 @@
   width: 280px;
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-left: 1px solid #ccc;
-  font-family: "Poppins", sans-serif;
+  background: var(--color-surface);
+  border-left: 1px solid var(--color-border);
+  font-family: inherit;
+  color: var(--color-text-primary);
 }
 
 /* Profile sidebar */
@@ -25,13 +26,13 @@
 
 .profile-avatar {
   font-size: 80px;
-  color: #000;
+  color: var(--color-text-primary);
   margin-bottom: 10px;
 }
 
 .profile-name {
   font-size: 14px;
-  color: #000;
+  color: var(--color-text-primary);
 }
 
 .profile-menu {
@@ -45,16 +46,16 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom: 1px solid #ccc;
+  border-bottom: 1px solid var(--color-border);
   padding: 10px 0;
-  color: #000;
+  color: var(--color-text-primary);
   font-size: 14px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .menu-item:hover {
-  color: #007bff;
+  color: var(--color-accent);
 }
 
 .menu-icon {
@@ -64,7 +65,7 @@
 
 .arrow {
   font-size: 18px;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 /* Account settings sidebar */
@@ -76,25 +77,29 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #fff;
+  background: var(--color-surface-elevated);
+  color: var(--color-text-primary);
+  box-shadow: var(--shadow-soft);
 }
 
 .back-button {
   position: absolute;
   top: 15px;
   left: 15px;
-  background: #000;
-  color: #fff;
+  background: var(--color-accent);
+  color: var(--color-button-text);
   border: none;
   border-radius: 50%;
   padding: 8px;
   cursor: pointer;
+  box-shadow: 0 12px 24px rgba(48, 56, 47, 0.2);
 }
 
 .account-title {
   margin-top: 40px;
   font-size: 14px;
   text-align: center;
+  color: var(--color-text-secondary);
 }
 
 .account-avatar {
@@ -115,25 +120,26 @@
 
 .info-label {
   font-size: 12px;
-  color: #555;
+  color: var(--color-text-secondary);
 }
 
 .info-value {
   font-size: 14px;
-  color: #000;
+  color: var(--color-text-primary);
 }
 
 .logout-btn {
   margin-top: auto;
-  background-color: #000;
-  color: #fff;
+  background-color: var(--color-accent);
+  color: var(--color-button-text);
   border: none;
   padding: 10px 30px;
   border-radius: 20px;
   cursor: pointer;
   transition: 0.3s;
+  box-shadow: var(--shadow-soft);
 }
 
 .logout-btn:hover {
-  background-color: #333;
+  background-color: var(--color-accent-hover);
 }

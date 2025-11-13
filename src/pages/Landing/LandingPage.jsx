@@ -6,6 +6,7 @@ import secureIcon from "./assets/secure.png";
 import soundIcon from "./assets/sound.png";
 import userIcon from "./assets/user.png";
 import member3 from "./assets/pic3.jpg";
+import leader from "./assets/AaronCard.png";
 import "./LandingPage.css";
 
 const featureCards = [
@@ -29,18 +30,21 @@ const featureCards = [
 
 const teamMembers = [
   {
-    name: "Aaron Clyde Guiruela",
-    role: "Product Lead",
-    image: "/images/member1.jpg",
-  },
-  {
     name: "Jeoffrey Delos Reyes",
     role: "Frontend Engineer",
+    bio: "Builds intuitive interfaces so every feature feels effortless to explore.",
     image: "/images/member2.jpg",
+  },
+  {
+    name: "Aaron Clyde Guiruela",
+    role: "Product Lead",
+    bio: "Shapes the NoteSight roadmap and keeps every launch focused on musicians.",
+    image: leader,
   },
   {
     name: "John Russel Gallanosa",
     role: "Backend Engineer",
+    bio: "Delivers fast, reliable processing that turns sheet music into vivid audio.",
     image: member3,
   },
 ];
@@ -74,30 +78,32 @@ export function LandingPage({ section }) {
         <section id="hero" className="hero-section">
           <div className="hero-content">
             <h1>See the notes. Hear the future.</h1>
-            <p>
+          </div>
+          <div className="hero-spacer" aria-hidden="true">
+            <div className="spacer">
+              <p>                                           </p>
+            </div>
+            <div className="hero-description">
+              <p>
               NoteSight transforms photos of sheet music into vivid audio in seconds.
               Upload, listen, and learn without the hurdles of traditional practice.
-            </p>
-            <div className="hero-actions">
-              <button type="button" className="primary-action" onClick={handleGetStarted}>
+              </p>
+              <div className="hero-actions">
+                <button type="button" className="primary-action" onClick={handleGetStarted}>
                 Get Started
               </button>
               <button type="button" className="secondary-action" onClick={() => navigate("/login")}>
                 Sign In
               </button>
-            </div>
-          </div>
-          <div className="hero-visual" aria-hidden="true">
-            <div className="visual-card">
-              <span>Upload. Analyze. Play.</span>
+              </div>
             </div>
           </div>
         </section>
 
         <section id="features" className="features-section">
           <header className="section-header">
-            <p className="eyebrow">Features</p>
-            <h2>Everything you need to hear your sheet music come alive</h2>
+            <p className="eyebrow"></p>
+            <h2>Let your sheet music come to life with every note</h2>
           </header>
           <div className="features-grid">
             {featureCards.map((card, index) => (
@@ -111,7 +117,6 @@ export function LandingPage({ section }) {
 
         <section id="about" className="about-section">
           <header className="section-header">
-            <p className="eyebrow">About</p>
             <h2>Built by musicians who love great tools</h2>
             <p className="section-description">
               We designed NoteSight to remove friction from practice. Whether you are
@@ -137,28 +142,19 @@ export function LandingPage({ section }) {
           </div>
 
           <div className="team-grid">
+            <p className="team-grid__label">Our Team</p>
             {teamMembers.map((member) => (
-              <article className="team-card" key={member.name}>
-                <div className="team-avatar">
-                  <img src={member.image} alt={member.name} />
+              <article className="team-card" key={member.name} tabIndex={0}>
+                <div className="team-card__image" aria-hidden="true">
+                  <img src={member.image} alt="" />
                 </div>
-                <h4>{member.name}</h4>
-                <p>{member.role}</p>
+                <div className="team-card__details">
+                  <span className="team-card__role">{member.role}</span>
+                  <h4>{member.name}</h4>
+                  <p className="team-card__bio">{member.bio}</p>
+                </div>
               </article>
             ))}
-          </div>
-        </section>
-
-        <section className="contact-section">
-          <div className="contact-card">
-            <h3>Have a project or feature request?</h3>
-            <p>
-              Reach out at <a href="mailto:hello@notesight.app">hello@notesight.app</a> and
-              we&apos;ll get back within two business days.
-            </p>
-            <button type="button" onClick={handleGetStarted} className="primary-action">
-              Try NoteSight now
-            </button>
           </div>
         </section>
       </main>

@@ -1,5 +1,70 @@
-html, body {
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap");
+
+:root {
+  --color-hunter: #fffbdf;
+  --color-hunter-soft: #f5f0c9;
+  --color-surface: #fffdf0;
+  --color-surface-elevated: #ffffff;
+  --color-surface-overlay: rgba(48, 56, 47, 0.08);
+  --color-text-primary: #30382f;
+  --color-text-secondary: #5a6658;
+  --color-accent: #8fb996;
+  --color-accent-hover: #6fa178;
+  --color-button-text: #102616;
+  --color-border: rgba(48, 56, 47, 0.18);
+  --shadow-soft: 0 18px 36px rgba(16, 24, 16, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
+  background-color: var(--color-hunter);
+  color: var(--color-text-primary);
+  font-family: "Inter", "Segoe UI", sans-serif;
+  line-height: 1.6;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+}
+
+#root {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, rgba(255, 251, 223, 1), rgba(245, 240, 201, 0.85));
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-button-text);
 }

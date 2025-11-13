@@ -11,15 +11,21 @@ export function SidebarToggle() {
 
   return (
     <>
-      {/* Example Button (you can place this anywhere) */}
-      <button className="toggle-btn" onClick={toggleSidebar}>
-        Open Profile
+      <button
+        className={`toggle-btn ${isOpen ? "open" : ""}`}
+        onClick={toggleSidebar}
+        aria-label={isOpen ? "Close profile sidebar" : "Open profile sidebar"}
+        aria-expanded={isOpen}
+        type="button"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
       </button>
 
-      {/* Overlay (dark background when open) */}
       {isOpen && <div className="overlay" onClick={toggleSidebar}></div>}
 
-      {/* Sidebar slides in from the right */}
+      
       <div className={`sidebar-wrapper ${isOpen ? "open" : ""}`}>
         <ProfileSidebar />
       </div>

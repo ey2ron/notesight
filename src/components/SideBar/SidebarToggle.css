@@ -2,17 +2,51 @@
   position: fixed;
   top: 20px;
   right: 20px;
-  background-color: #000;
-  color: #fff;
+  width: 52px;
+  height: 52px;
+  background-color: var(--color-accent);
   border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
   cursor: pointer;
   z-index: 1001;
+  box-shadow: var(--shadow-soft);
+  transition: background-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.toggle-btn span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  border-radius: 999px;
+  background-color: var(--color-button-text);
+  transition: transform 0.25s ease, opacity 0.25s ease, width 0.25s ease;
 }
 
 .toggle-btn:hover {
-  background-color: #333;
+  background-color: var(--color-accent-hover);
+  box-shadow: 0 24px 42px rgba(48, 56, 47, 0.24);
+}
+
+.toggle-btn:focus-visible {
+  outline: 3px solid rgba(48, 56, 47, 0.38);
+  outline-offset: 4px;
+}
+
+.toggle-btn.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.toggle-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.toggle-btn.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
 }
 
 /* Overlay when sidebar is open */
@@ -22,7 +56,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(48, 56, 47, 0.28);
   z-index: 1000;
 }
 
@@ -33,8 +67,8 @@
   right: -300px; /* hidden by default */
   width: 280px;
   height: 100vh;
-  background-color: #fff;
-  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.2);
+  background-color: var(--color-surface-elevated);
+  box-shadow: -2px 0 30px rgba(48, 56, 47, 0.18);
   transition: right 0.3s ease;
   z-index: 1002;
 }
