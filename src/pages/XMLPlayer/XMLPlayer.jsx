@@ -518,10 +518,6 @@ export function XMLPlayerPage() {
 
           <aside className="xmlplayer-right" aria-label="Controls">
             <div className="controls-card">
-              <label className="app__file">
-                <span className="app__label">Score File</span>
-                <input type="file" accept=".musicxml,.xml,.mxl" onChange={handleFileChange} />
-              </label>
 
               <label className="app__field">
                 <span className="app__label">Instrument</span>

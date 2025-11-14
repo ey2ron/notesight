@@ -6,7 +6,6 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { toast } from "react-toastify";
 import { auth, googleProvider } from "./firebase.jsx";
-import MusicIcon from "./assets/home.png";
 import InstantAudioPlaybackIcon from "./assets/InstantAudioPlayback.png";
 import CuttingEdgeIcon from "./assets/CuttingEdge.png";
 import InclusiveLearningIcon from "./assets/InclusiveLearning.png";
@@ -54,9 +53,6 @@ export function LoginPage() {
   return (
     <div className="auth-container">
       <div className="auth-left">
-        <div className="logo">
-          <img src={MusicIcon} alt="Notesight logo" />
-        </div>
         <h2>Welcome back</h2>
         <p className="subtitle">Please enter your details</p>
 

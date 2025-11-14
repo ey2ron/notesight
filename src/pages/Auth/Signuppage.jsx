@@ -7,7 +7,6 @@ import { useState } from "react";
 import { auth, db, googleProvider } from "./firebase.jsx";
 import { setDoc, doc } from "firebase/firestore";
 import { toast } from "react-toastify";
-import MusicIcon from "./assets/home.png";
 import InstantAudioPlaybackIcon from "./assets/InstantAudioPlayback.png";
 import CuttingEdgeIcon from "./assets/CuttingEdge.png";
 import InclusiveLearningIcon from "./assets/InclusiveLearning.png";
@@ -58,7 +57,7 @@ export function SignupPage() {
       toast.success("Registration successful!", {
         position: "top-left",
       });
-  navigate("/home", { replace: true });
+       navigate("/home", { replace: true });
 
     } catch (error) {
       console.error("Error during registration:", error.message);
@@ -100,9 +99,6 @@ export function SignupPage() {
   return (
     <div className="auth-container">
       <div className="auth-left">
-        <div className="logo">
-          <img src={MusicIcon} alt="Notesight logo" />
-        </div>
         <h2>Are you new?</h2>
         <p className="subtitle">Please enter your details</p>
 
