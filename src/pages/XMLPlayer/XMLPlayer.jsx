@@ -506,47 +506,48 @@ export function XMLPlayerPage() {
   }, [location.pathname, location.state, loadScoreFile, navigate]);
 
   return (
-    <div className="app">
-      <div className="app__card">
-        <h1 className="app__title">🎼 Sheet Music Player</h1>
+    <div className="xmlplayer">
+      <header className="xmlplayer__header">
+        <h1 className="xmlplayer__title">🎼 Sheet Music Player</h1>
 
-        {/* Two-column grid: left = sheet, right = controls card */}
-        <div className="xmlplayer-grid">
-          <div className="xmlplayer-left">
-            <div className="app__sheet" ref={containerRef} />
-          </div>
+        <label className="xmlplayer__upload">
+          <input type="file" accept=".musicxml,.xml,.mxl" onChange={handleFileChange} />
+          <span className="xmlplayer__upload-label">Upload Score</span>
+        </label>
+      </header>
 
-          <aside className="xmlplayer-right" aria-label="Controls">
-            <div className="controls-card">
+      <main className="xmlplayer__stage">
+        <div className="xmlplayer__sheet" ref={containerRef} />
+      </main>
 
-              <label className="app__field">
-                <span className="app__label">Instrument</span>
-                <select value={instrumentName} onChange={handleInstrumentChange}>
-                  {INSTRUMENT_OPTIONS.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+      <nav className="xmlplayer__controls" aria-label="Playback controls">
+        <div className="xmlplayer__controls-group">
+          <label className="xmlplayer__field">
+            <span className="xmlplayer__field-label">Instrument</span>
+            <select value={instrumentName} onChange={handleInstrumentChange}>
+              {INSTRUMENT_OPTIONS.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
 
-              <label className="app__field">
-                <span className="app__label">Speed: {bpm} BPM</span>
-                <input type="range" min={MIN_BPM} max={MAX_BPM} step={1} value={bpm} onChange={handleBpmChange} />
-              </label>
-
-              <div className="app__buttons">
-                <button type="button" className="app__button app__button--play" onClick={handlePlay}>
-                  ▶️ Play
-                </button>
-                <button type="button" className="app__button app__button--stop" onClick={handleStop}>
-                  ⏹ Stop
-                </button>
-              </div>
-            </div>
-          </aside>
+          <label className="xmlplayer__field xmlplayer__field--slider">
+            <span className="xmlplayer__field-label">Speed: {bpm} BPM</span>
+            <input type="range" min={MIN_BPM} max={MAX_BPM} step={1} value={bpm} onChange={handleBpmChange} />
+          </label>
         </div>
-      </div>
+
+        <div className="xmlplayer__buttons">
+          <button type="button" className="xmlplayer__button xmlplayer__button--play" onClick={handlePlay}>
+            ▶️ Play
+          </button>
+          <button type="button" className="xmlplayer__button xmlplayer__button--stop" onClick={handleStop}>
+            ⏹ Stop
+          </button>
+        </div>
+      </nav>
     </div>
   );
 }
