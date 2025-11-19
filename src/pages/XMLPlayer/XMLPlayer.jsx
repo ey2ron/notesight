@@ -466,6 +466,10 @@ export function XMLPlayerPage() {
     }
   }, []);
 
+  const handleBack = useCallback(() => {
+    navigate(-1);
+  }, [navigate]);
+
   useEffect(() => {
     return () => {
       containerRef.current?.querySelectorAll("[data-note-click-bound]").forEach((el) => {
@@ -508,12 +512,9 @@ export function XMLPlayerPage() {
   return (
     <div className="xmlplayer">
       <header className="xmlplayer__header">
-        <h1 className="xmlplayer__title">🎼 Sheet Music Player</h1>
-
-        <label className="xmlplayer__upload">
-          <input type="file" accept=".musicxml,.xml,.mxl" onChange={handleFileChange} />
-          <span className="xmlplayer__upload-label">Upload Score</span>
-        </label>
+        <button type="button" className="xmlplayer__back" onClick={handleBack}>
+          ← Back
+        </button>
       </header>
 
       <main className="xmlplayer__stage">

@@ -1,27 +1,44 @@
+import { useState } from "react"
 import { SidebarToggle } from "../../components/SideBar/SidebarToggle"
-import { Link } from "react-router-dom"
+import { OMRUpload } from "../../components/OMRUpload"
+import { FavoritesPanel } from "../../components/Home/FavoritesPanel"
+import { LibraryPanel } from "../../components/Home/LibraryPanel"
 import "./HomePage.css"
-import HomeBg from "../Auth/assets/home.png"
+import HomeBg from "../Landing/assets/BG.png"
 
 export function HomePage() {
+  const fileInputId = "home-omr-file"
+  const [activePanel, setActivePanel] = useState("favorites")
+
+  const handleGetStarted = () => {
+    const input = document.getElementById(fileInputId)
+    if (input) {
+      input.focus()
+      input.click()
+    }
+  }
+
+  const handleSectionChange = (section) => {
+    setActivePanel(section)
+  }
+
   return (
     <>
-      <SidebarToggle />
-      <div className="home-hero" style={{ backgroundImage: `url(${HomeBg})` }}>
-        <div className="home-overlay" />
-        <div className="home-content">
-          <div className="home-heading-group">
-            <p className="home-kicker">Welcome to</p>
-            <h1 className="home-title">NoteSight</h1>
-            <p className="home-subtitle">
-              Transform sheet music into sound instantly with our optical music recognition technology.
-            </p>
+      <SidebarToggle onSelectSection={handleSectionChange} />
+      <div className="home-layout">
+        <div className="home-brand">NoteSight</div>
+        <div className="home-omr-inline">
+          <div className="home-omr-surface">
+            <div className="home-omr-overlay" />
+            <OMRUpload layout="embedded" inputId={fileInputId} backgroundImage={HomeBg} />
           </div>
+        </div>
 
-          {/* Button that navigates to the XML Player page */}
-          <Link to="/xmlplayer" className="xmlplayer-btn">
-            Get Started
-          </Link>
+        <div className="home-hero" style={{ backgroundImage: `url(${HomeBg})` }}>
+          <div className="home-overlay" />
+          <div className="home-hero-body">
+            {activePanel === "library" ? <LibraryPanel /> : <FavoritesPanel />}
+          </div>
         </div>
       </div>
     </>

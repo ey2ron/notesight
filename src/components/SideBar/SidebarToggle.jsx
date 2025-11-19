@@ -2,11 +2,18 @@ import { useState } from "react";
 import { ProfileSidebar } from "./ProfileSidebar";
 import "./SidebarToggle.css";
 
-export function SidebarToggle() {
+export function SidebarToggle({ onSelectSection }) {
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleSectionSelect = (section) => {
+    if (onSelectSection) {
+      onSelectSection(section);
+    }
+    setIsOpen(false);
   };
 
   return (
@@ -25,9 +32,8 @@ export function SidebarToggle() {
 
       {isOpen && <div className="overlay" onClick={toggleSidebar}></div>}
 
-      
       <div className={`sidebar-wrapper ${isOpen ? "open" : ""}`}>
-        <ProfileSidebar />
+        <ProfileSidebar onSelectSection={handleSectionSelect} />
       </div>
     </>
   );

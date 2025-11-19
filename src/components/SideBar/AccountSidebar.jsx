@@ -2,21 +2,20 @@ import { useEffect, useState } from "react";
 import { FaArrowLeft, FaUserCircle } from "react-icons/fa";
 import { auth, db } from "../../pages/Auth/firebase.jsx";
 import { doc, setDoc } from "firebase/firestore";
-import { updateEmail, updateProfile } from "firebase/auth";
+import { updateProfile } from "firebase/auth";
 import { toast } from "react-toastify";
 import "./ProfileSidebar.css";
 
 export function AccountSidebar({ onBack, userData, onUserDataChange, onAvatarChange }) {
     const [isEditing, setIsEditing] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [formState, setFormState] = useState({ name: "", username: "", email: "" });
+    const [formState, setFormState] = useState({ name: "", username: "" });
 
     useEffect(() => {
         if (userData) {
             setFormState({
                 name: userData.name ?? "",
                 username: userData.username ?? "",
-                email: userData.email ?? "",
             });
         }
     }, [userData]);
@@ -57,7 +56,7 @@ export function AccountSidebar({ onBack, userData, onUserDataChange, onAvatarCha
 
         const trimmedName = formState.name.trim();
         const trimmedUsername = formState.username.trim();
-        const trimmedEmail = formState.email.trim();
+        const trimmedEmail = userData.email?.trim() ?? "";
 
         if (!trimmedUsername) {
             toast.error("Username cannot be empty.", { position: "top-left" });
@@ -69,27 +68,11 @@ export function AccountSidebar({ onBack, userData, onUserDataChange, onAvatarCha
         let emailToPersist = trimmedEmail;
         let emailUpdateError = null;
 
-        if (auth.currentUser) {
-            if (trimmedName && auth.currentUser.displayName !== trimmedName) {
-                try {
-                    await updateProfile(auth.currentUser, { displayName: trimmedName });
-                } catch (error) {
-                    console.error("Failed to update display name:", error);
-                }
-            }
-
-            if (
-                trimmedEmail &&
-                auth.currentUser.email &&
-                auth.currentUser.email.toLowerCase() !== trimmedEmail.toLowerCase()
-            ) {
-                try {
-                    await updateEmail(auth.currentUser, trimmedEmail);
-                } catch (error) {
-                    console.error("Failed to update email:", error);
-                    emailUpdateError = error;
-                    emailToPersist = userData.email ?? trimmedEmail;
-                }
+        if (auth.currentUser && trimmedName && auth.currentUser.displayName !== trimmedName) {
+            try {
+                await updateProfile(auth.currentUser, { displayName: trimmedName });
+            } catch (error) {
+                console.error("Failed to update display name:", error);
             }
         }
 
@@ -122,19 +105,8 @@ export function AccountSidebar({ onBack, userData, onUserDataChange, onAvatarCha
                         }
             );
 
-            if (emailUpdateError) {
-                const errorMessage =
-                    emailUpdateError?.code === "auth/requires-recent-login"
-                        ? "Please sign in again to change your email."
-                        : "Failed to update email address.";
-                toast.error(errorMessage, {
-                    position: "top-left",
-                });
-                setFormState((prev) => ({ ...prev, email: emailToPersist }));
-            } else {
-                toast.success("Account updated.", { position: "top-left" });
-                setIsEditing(false);
-            }
+            toast.success("Account updated.", { position: "top-left" });
+            setIsEditing(false);
         } catch (error) {
             console.error("Failed to update account details:", error);
             toast.error("Failed to update account details.", { position: "top-left" });
@@ -232,11 +204,10 @@ export function AccountSidebar({ onBack, userData, onUserDataChange, onAvatarCha
                                     name="email"
                                     type="email"
                                     className="info-input"
-                                    value={formState.email}
-                                    onChange={handleInputChange}
-                                    placeholder="Email"
-                                    required
+                                    value={userData.email ?? ""}
+                                    disabled
                                 />
+                                <p className="info-hint">Email updates are managed by support.</p>
                             </div>
 
                             <div className="account-actions">

@@ -6,7 +6,6 @@ import { SignupPage } from './pages/Auth/Signuppage';
 import { LoginPage } from './pages/Auth/Loginpage';
 import { HomePage } from './pages/Home/HomePage';
 import { XMLPlayerPage } from './pages/XMLPlayer/XMLPlayer';
-import { OMRUpload } from './components/OMRUpload';
 
 
 
@@ -21,7 +20,6 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/home" element={<HomePage />} />
       <Route path="/xmlplayer" element={<XMLPlayerPage />} />
-      <Route path="/omr" element={<OMRUpload />} />
       </Routes>
       <ToastContainer/>
     </Router>

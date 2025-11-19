@@ -7,7 +7,7 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 
-export function ProfileSidebar() {
+export function ProfileSidebar({ onSelectSection }) {
   const [showAccount, setShowAccount] = useState(false);
   const [userData, setUserData] = useState(null);
 
@@ -111,6 +111,13 @@ export function ProfileSidebar() {
 
   const displayName = userData?.username || userData?.name || "USER NAME";
 
+  const handleSectionClick = (section) => {
+    if (onSelectSection) {
+      onSelectSection(section);
+    }
+    setShowAccount(false);
+  };
+
   return (
     <div className="sidebar-container">
       {!showAccount ? (
@@ -129,12 +136,12 @@ export function ProfileSidebar() {
           </div>
 
           <div className="profile-menu">
-            <div className="menu-item">
+            <div className="menu-item" onClick={() => handleSectionClick("library")}>
               <FaBook className="menu-icon" />
               <span>My Library</span>
               <span className="arrow">›</span>
             </div>
-            <div className="menu-item">
+            <div className="menu-item" onClick={() => handleSectionClick("favorites")}>
               <FaHeart className="menu-icon" />
               <span>Favorites</span>
               <span className="arrow">›</span>

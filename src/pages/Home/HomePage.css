@@ -1,13 +1,93 @@
-.home-hero {
+.home-layout {
+	--home-panel-min-height: 520px;
+	min-height: 96vh;
+	padding: 4rem 5rem;
+	background: var(--color-hunter);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 2.5rem;
+	align-items: stretch;
+	justify-content: center;
+	box-sizing: border-box;
 	position: relative;
-	min-height: 100vh;
+	margin-top: 2rem;
+}
+
+
+
+.home-brand {
+	position: absolute;
+	top: .50rem;
+	left: 5rem;
+	font-size: 1.1rem;
+	font-weight: 700;
+	letter-spacing: 0.4em;
+	text-transform: uppercase;
+	color: rgba(48, 56, 47, 0.7);
+}
+
+
+
+.home-omr-inline {
+	flex: 0 1 480px;
+	display: flex;
+	justify-content: center;
+	align-items: stretch;
+	position: relative;
+	min-height: var(--home-panel-min-height);
+	margin:0%;
+	padding: 0%;
+}
+
+
+.home-omr-surface {
+	flex: 1;
+	position: relative;
+	display: flex;
+	align-items: stretch;
+	justify-content: center;
+	padding: 2.5rem 1.75rem;
+	border-radius: 32px;
+	overflow: hidden;
+	box-shadow: 0 24px 46px rgba(48, 56, 47, 0.26);
 	background-size: cover;
 	background-position: center;
-	padding: 4rem 5rem;
+	padding: 0%;
+}
+
+.home-omr-overlay {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(150deg, rgba(255, 251, 223, 0.92) 0%, rgba(255, 255, 255, 0.72) 45%, rgba(143, 185, 150, 0.32) 100%);
+	pointer-events: none;
+}
+
+.home-hero {
+	position: relative;
+	flex: 1 1 420px;
+	min-height: var(--home-panel-min-height);
+	background-size: cover;
+	background-position: center;
+	padding: 3.5rem;
 	display: flex;
-	align-items: flex-start;
+	align-items: stretch;
 	justify-content: flex-start;
 	color: var(--color-text-primary);
+	border-radius: 32px;
+	overflow: hidden;
+	box-shadow: 0 24px 46px rgba(48, 56, 47, 0.28);
+	padding: 0%;
+}
+
+.home-hero-body {
+	position: relative;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	width: 100%;
+	height: 100%;
+	gap: 2rem;
 }
 
 .home-overlay {
@@ -66,6 +146,8 @@
 	font-size: 1.05rem;
 	box-shadow: 0 20px 40px rgba(48, 56, 47, 0.24);
 	transition: transform 0.18s ease, box-shadow 0.18s ease;
+	border: none;
+	cursor: pointer;
 }
 
 .xmlplayer-btn:hover {
@@ -77,10 +159,36 @@
 	transform: translateY(0);
 }
 
+.xmlplayer-btn:focus-visible {
+	outline: 3px solid rgba(48, 56, 47, 0.4);
+	outline-offset: 4px;
+}
+
 @media (max-width: 900px) {
+	.home-layout {
+		--home-panel-min-height: 420px;
+		padding: 3rem 2.25rem;
+		gap: 2rem;
+		margin-top: 1.5rem;
+	}
+
+	.home-brand {
+		top: 1rem;
+		left: 2.25rem;
+		letter-spacing: 0.32em;
+	}
+
+	.home-omr-inline {
+		flex-basis: 100%;
+		min-height: var(--home-panel-min-height);
+	}
+
+	.home-omr-surface {
+		padding: 2.25rem 1.75rem;
+	}
+
 	.home-hero {
-		padding: 3rem 2rem;
-		min-height: 70vh;
+		padding: 2.75rem 2.25rem;
 	}
 
 	.home-content {
@@ -101,14 +209,35 @@
 		font-size: 1rem;
 	}
 
-	.xmlplayer-btn {
-		align-self: flex-start;
+	.home-omr-inline {
+		flex-basis: 100%;
+		min-height: var(--home-panel-min-height);
 	}
 }
 
 @media (max-width: 540px) {
-	.home-hero {
+	.home-layout {
+		--home-panel-min-height: 360px;
 		padding: 2.5rem 1.5rem;
+		margin-top: 1.25rem;
+	}
+
+	.home-brand {
+		top: 0.9rem;
+		left: 1.5rem;
+		letter-spacing: 0.28em;
+	}
+
+	.home-omr-inline {
+		flex-basis: 100%;
+	}
+
+	.home-omr-surface {
+		padding: 2rem 1.35rem;
+	}
+
+	.home-hero {
+		padding: 2.25rem 1.5rem;
 	}
 
 	.home-kicker {

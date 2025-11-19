@@ -2,7 +2,9 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './OMRUpload.css';
 
-export function OMRUpload() {
+const CARD_OVERLAY_GRADIENT = 'linear-gradient(160deg, rgba(255, 251, 223, 0.96) 0%, rgba(255, 255, 255, 0.78) 46%, rgba(143, 185, 150, 0.34) 100%)';
+
+export function OMRUpload({ layout = 'standalone', inputId = 'omr-file', backgroundImage } = {}) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [xmlResult, setXmlResult] = useState('');
@@ -19,6 +21,20 @@ export function OMRUpload() {
     const raw = import.meta.env.VITE_API_URL ?? fallback;
     return raw.endsWith('/') ? raw.slice(0, -1) : raw;
   }, []);
+
+  const rootClassName = layout === 'embedded'
+    ? 'omr-upload-root omr-upload-root--embedded'
+    : 'omr-upload-root omr-upload-root--standalone';
+  const cardClassName = layout === 'embedded' ? 'omr-card omr-card--embedded' : 'omr-card';
+
+  const cardStyle = backgroundImage
+    ? {
+        backgroundImage: `${CARD_OVERLAY_GRADIENT}, url(${backgroundImage})`,
+        backgroundSize: 'cover, cover',
+        backgroundPosition: 'center, center',
+        backgroundRepeat: 'no-repeat, no-repeat',
+      }
+    : undefined;
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files?.[0] ?? null);
@@ -134,8 +150,8 @@ export function OMRUpload() {
   };
 
   return (
-    <div className="omr-upload-page">
-      <section className="omr-card" aria-busy={isLoading}>
+    <div className={rootClassName}>
+      <section className={cardClassName} aria-busy={isLoading} style={cardStyle}>
         {isLoading && (
           <div className="omr-loader" role="status" aria-live="polite">
             <span className="omr-spinner" />
@@ -152,12 +168,12 @@ export function OMRUpload() {
         </header>
 
         <form className="omr-form" onSubmit={convertScore}>
-          <label className="omr-field" htmlFor="omr-file">
+          <label className="omr-field" htmlFor={inputId}>
             <span className="omr-field__label">Score file</span>
             <span className="omr-field__hint">PNG, JPG, or PDF up to 64 MB</span>
             <input
               className="omr-field__input"
-              id="omr-file"
+              id={inputId}
               type="file"
               accept=".png,.jpg,.jpeg,.pdf"
               onChange={handleFileChange}
