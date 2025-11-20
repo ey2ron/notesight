@@ -149,6 +149,10 @@
   background: linear-gradient(135deg, #f07c54, #f09b54);
 }
 
+.xmlplayer__button--library {
+  background: linear-gradient(135deg, #4f9d70, #6fc189);
+}
+
 .xmlplayer__button:hover {
   transform: translateY(-2px);
   opacity: 0.96;

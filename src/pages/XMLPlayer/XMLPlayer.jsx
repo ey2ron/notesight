@@ -3,6 +3,10 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { OpenSheetMusicDisplay } from "opensheetmusicdisplay";
 import JSZip from "jszip";
 import Soundfont from "soundfont-player";
+import { collection, doc, getDocs, query, serverTimestamp, setDoc, where } from "firebase/firestore";
+import { getDownloadURL, ref as storageRef, uploadBytes } from "firebase/storage";
+import { toast } from "react-toastify";
+import { auth, db, storage } from "../Auth/firebase.jsx";
 import "./XMLPlayer.css";
 
 // Expose JSZip globally so OSMD can unpack compressed .mxl scores.
@@ -24,10 +28,64 @@ const INSTRUMENT_OPTIONS = [
 
 const MIN_BPM = 30;
 const MAX_BPM = 240;
+const DEFAULT_SCORE_FILENAME = "audiveris-output.mxl";
+const ILLEGAL_STORAGE_CHARS = new Set(["#", "[", "]", "*", "?", "\\", "/"]);
+const MAX_INLINE_SCORE_BYTES = 700 * 1024; // keep inline payloads well below Firestore 1MB limit
+
+function arrayBufferToBase64(buffer) {
+  if (!buffer) {
+    return "";
+  }
+  const bytes = new Uint8Array(buffer);
+  if (bytes.length === 0) {
+    return "";
+  }
+  const chunkSize = 0x8000;
+  let binary = "";
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    const chunk = bytes.subarray(offset, offset + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+
+  const globalScope = typeof globalThis !== "undefined" ? globalThis : {};
+  if (typeof globalScope.btoa === "function") {
+    return globalScope.btoa(binary);
+  }
+  if (globalScope.Buffer) {
+    return globalScope.Buffer.from(binary, "binary").toString("base64");
+  }
+
+  throw new Error("No base64 encoder available in this environment");
+}
+
+function sanitizeFileName(name) {
+  const fallback = DEFAULT_SCORE_FILENAME;
+  if (typeof name !== "string") {
+    return fallback;
+  }
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return fallback;
+  }
+  let sanitized = "";
+  for (const char of trimmed) {
+    const code = char.charCodeAt(0);
+    if (code < 32 || ILLEGAL_STORAGE_CHARS.has(char)) {
+      sanitized += "_";
+    } else {
+      sanitized += char;
+    }
+  }
+  return sanitized;
+}
 
 export function XMLPlayerPage() {
   const [bpm, setBpm] = useState(120);
   const [instrumentName, setInstrumentName] = useState("acoustic_grand_piano");
+  const [isSavingToLibrary, setIsSavingToLibrary] = useState(false);
+  const [hasLoadedScore, setHasLoadedScore] = useState(false);
+  const [isAlreadyInLibrary, setIsAlreadyInLibrary] = useState(false);
+  const [isCheckingLibrary, setIsCheckingLibrary] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -39,6 +97,7 @@ export function XMLPlayerPage() {
   const lastCursorIndexRef = useRef(0);
   const playTimerRef = useRef(null);
   const playingRef = useRef(false);
+  const currentScoreRef = useRef({ file: null, name: "", extension: "", mimeType: "" });
   const noteElementDataRef = useRef(new WeakMap());
 
   useEffect(() => {
@@ -214,7 +273,6 @@ export function XMLPlayerPage() {
           return zip.file(fullPath);
         }
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.warn("Failed to parse META-INF/container.xml", error);
       }
 
@@ -301,6 +359,33 @@ export function XMLPlayerPage() {
     }
   }, [findMeasureElementFromNode, handleNoteClick]);
 
+  const checkIfScoreExists = useCallback(async (rawName) => {
+    const user = auth.currentUser;
+    if (!user) {
+      setIsAlreadyInLibrary(false);
+      setIsCheckingLibrary(false);
+      return false;
+    }
+
+    const sanitizedName = sanitizeFileName(rawName || DEFAULT_SCORE_FILENAME);
+    setIsCheckingLibrary(true);
+
+    try {
+      const libraryCollection = collection(db, "users", user.uid, "library");
+      const libraryQuery = query(libraryCollection, where("fileName", "==", sanitizedName));
+      const snapshot = await getDocs(libraryQuery);
+      const exists = !snapshot.empty;
+      setIsAlreadyInLibrary(exists);
+      return exists;
+    } catch (error) {
+      console.error("Failed to check existing scores", error);
+      setIsAlreadyInLibrary(false);
+      return false;
+    } finally {
+      setIsCheckingLibrary(false);
+    }
+  }, []);
+
   const loadScoreFile = useCallback(
     async (file) => {
       if (!file || !containerRef.current) {
@@ -316,8 +401,11 @@ export function XMLPlayerPage() {
         return false;
       }
 
+      setHasLoadedScore(false);
+      currentScoreRef.current = { file: null, name: "", extension: "", mimeType: "" };
       stopPlayback();
       noteElementDataRef.current = new WeakMap();
+      setIsAlreadyInLibrary(false);
 
       let musicXmlContent = "";
       try {
@@ -329,7 +417,6 @@ export function XMLPlayerPage() {
         }
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        // eslint-disable-next-line no-console
         console.error("Failed to unpack MusicXML", err);
         alert(`Unable to read MusicXML: ${message}`);
         return false;
@@ -353,33 +440,112 @@ export function XMLPlayerPage() {
         osmdRef.current.render();
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        // eslint-disable-next-line no-console
         console.error("Failed to load MusicXML", err);
         alert(`Unable to load MusicXML: ${message}`);
         return false;
       }
 
+      const resolvedName = file.name && file.name.trim() ? file.name : DEFAULT_SCORE_FILENAME;
+      const resolvedExtension = resolvedName.includes(".")
+        ? (resolvedName.split(".").pop() || "").toLowerCase()
+        : "";
+      currentScoreRef.current = {
+        file,
+        name: resolvedName,
+        extension: resolvedExtension,
+        mimeType: file.type || "",
+      };
       attachNoteClickHandlers();
       stopPlayback();
       lastCursorIndexRef.current = 0;
+      await checkIfScoreExists(resolvedName);
+      setHasLoadedScore(true);
       return true;
     },
-    [attachNoteClickHandlers, readMusicXmlFromMxl, stopPlayback]
+    [attachNoteClickHandlers, checkIfScoreExists, readMusicXmlFromMxl, stopPlayback]
   );
 
-  const handleFileChange = useCallback(
-    async (event) => {
-      const inputElement = event.target;
-      const file = inputElement.files?.[0];
-      if (!file) {
+  const handleAddToLibrary = useCallback(async () => {
+    if (isSavingToLibrary) {
+      return;
+    }
+
+    if (isAlreadyInLibrary) {
+      toast.info("This score is already in your library.");
+      return;
+    }
+
+    const user = auth.currentUser;
+    if (!user) {
+      toast.error("Sign in to save scores to your library.");
+      return;
+    }
+
+    const scoreMeta = currentScoreRef.current;
+    if (!scoreMeta?.file) {
+      toast.error("Load a score before adding it to your library.");
+      return;
+    }
+
+    setIsSavingToLibrary(true);
+
+    try {
+      const originalName = scoreMeta.name && scoreMeta.name.trim() ? scoreMeta.name : scoreMeta.file.name;
+      const sanitizedName = sanitizeFileName(originalName || DEFAULT_SCORE_FILENAME);
+      if (await checkIfScoreExists(sanitizedName)) {
+        toast.info("This score is already in your library.");
         return;
       }
+      const extension = (scoreMeta.extension || sanitizedName.split(".").pop() || "mxl").toUpperCase();
+      const baseTitle = sanitizedName.replace(/\.[^/.]+$/, "") || "Untitled Score";
+      const storagePath = `users/${user.uid}/library/${Date.now()}-${sanitizedName}`;
+      const fileRef = storageRef(storage, storagePath);
 
-      await loadScoreFile(file);
-      inputElement.value = "";
-    },
-    [loadScoreFile]
-  );
+      let inlineScoreData = "";
+      if (scoreMeta.file.size <= MAX_INLINE_SCORE_BYTES) {
+        try {
+          const arrayBuffer = await scoreMeta.file.arrayBuffer();
+          inlineScoreData = arrayBufferToBase64(arrayBuffer);
+        } catch (encodeError) {
+          console.warn("Failed to encode inline score payload", encodeError);
+        }
+      }
+
+      await uploadBytes(fileRef, scoreMeta.file, {
+        contentType: scoreMeta.mimeType || scoreMeta.file.type || "application/octet-stream",
+      });
+      const downloadURL = await getDownloadURL(fileRef);
+      const libraryCollection = collection(db, "users", user.uid, "library");
+      const docRef = doc(libraryCollection);
+      const now = serverTimestamp();
+      const payload = {
+        title: baseTitle,
+        fileName: sanitizedName,
+        fileExtension: extension,
+        storagePath,
+        downloadURL,
+        isFavorite: false,
+        scoreSize: scoreMeta.file.size,
+        createdAt: now,
+        updatedAt: now,
+        lastOpenedAt: now,
+      };
+
+      if (inlineScoreData) {
+        payload.scoreData = inlineScoreData;
+        payload.scoreMimeType = scoreMeta.mimeType || scoreMeta.file.type || "application/octet-stream";
+      }
+
+      await setDoc(docRef, payload);
+      toast.success("Score added to your library.");
+      setIsAlreadyInLibrary(true);
+    } catch (error) {
+      console.error("Failed to add score to library", error);
+      toast.error("Could not add this score to your library.");
+    } finally {
+      setIsSavingToLibrary(false);
+    }
+  }, [checkIfScoreExists, currentScoreRef, isAlreadyInLibrary, isSavingToLibrary]);
 
   const handlePlay = useCallback(async () => {
     const osmd = osmdRef.current;
@@ -471,8 +637,9 @@ export function XMLPlayerPage() {
   }, [navigate]);
 
   useEffect(() => {
+    const containerEl = containerRef.current;
     return () => {
-      containerRef.current?.querySelectorAll("[data-note-click-bound]").forEach((el) => {
+      containerEl?.querySelectorAll("[data-note-click-bound]").forEach((el) => {
         el.removeEventListener("click", handleNoteClick);
         delete el.dataset.noteClickBound;
       });
@@ -509,6 +676,16 @@ export function XMLPlayerPage() {
     };
   }, [location.pathname, location.state, loadScoreFile, navigate]);
 
+  const addToLibraryDisabled =
+    !hasLoadedScore || isSavingToLibrary || isAlreadyInLibrary || isCheckingLibrary;
+  const addButtonLabel = isAlreadyInLibrary
+    ? "Already in Library"
+    : isSavingToLibrary
+      ? "Saving..."
+      : isCheckingLibrary
+        ? "Checking..."
+        : "Add to Library";
+
   return (
     <div className="xmlplayer">
       <header className="xmlplayer__header">
@@ -541,6 +718,14 @@ export function XMLPlayerPage() {
         </div>
 
         <div className="xmlplayer__buttons">
+          <button
+            type="button"
+            className="xmlplayer__button xmlplayer__button--library"
+            onClick={handleAddToLibrary}
+            disabled={addToLibraryDisabled}
+          >
+            {addButtonLabel}
+          </button>
           <button type="button" className="xmlplayer__button xmlplayer__button--play" onClick={handlePlay}>
             ▶️ Play
           </button>

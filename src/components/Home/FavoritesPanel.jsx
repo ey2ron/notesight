@@ -1,7 +1,19 @@
 import "./HomePanels.css";
 
-export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete }) {
+export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete, onOpen, emptyMessage, openingItemId }) {
   const hasFavorites = items.length > 0;
+  const fallbackMessage = emptyMessage ?? "No favorites yet. Save a conversion to see it here.";
+
+  const handleCardKeyDown = (event, item) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onOpen?.(item);
+    }
+  };
+
+  const preventPropagation = (event) => {
+    event.stopPropagation();
+  };
 
   return (
     <section className="home-panel" aria-label="Favorites">
@@ -12,7 +24,18 @@ export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete })
       <div className={`home-panel__body ${hasFavorites ? "home-panel__body--library" : ""}`}>
         {hasFavorites ? (
           items.map((item) => (
-            <article key={item.id} className="library-card library-card--favorite" aria-label={`${item.title} favorite`}>
+            <article
+              key={item.id}
+              className={`library-card library-card--favorite${onOpen ? " library-card--interactive" : ""}${
+                openingItemId === item.id ? " library-card--opening" : ""
+              }`}
+              aria-label={`${item.title} favorite`}
+              role={onOpen ? "button" : undefined}
+              tabIndex={onOpen ? 0 : undefined}
+              onClick={onOpen ? () => onOpen(item) : undefined}
+              onKeyDown={onOpen ? (event) => handleCardKeyDown(event, item) : undefined}
+              aria-busy={openingItemId === item.id}
+            >
               <div className="library-card__thumb" aria-hidden="true" style={{ backgroundColor: item.thumbColor }}>
                 <span className="library-card__filetype">{item.type}</span>
                 <div
@@ -32,8 +55,14 @@ export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete })
                   <p className="library-card__title">{item.title}</p>
                   {item.lastOpened && <p className="library-card__meta">Opened {item.lastOpened}</p>}
                 </div>
-                <div className="library-card__menu" role="group" aria-label={`Options for ${item.title}`}>
-                  <button type="button" className="library-card__menu-button" aria-haspopup="true" aria-expanded="false">
+                <div className="library-card__menu" role="group" aria-label={`Options for ${item.title}`} onClick={preventPropagation}>
+                  <button
+                    type="button"
+                    className="library-card__menu-button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    onClick={preventPropagation}
+                  >
                     ⋮
                   </button>
                   <ul className="library-card__menu-list" role="menu">
@@ -41,7 +70,10 @@ export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete })
                       <button
                         type="button"
                         className="library-card__menu-item"
-                        onClick={() => onUnfavorite?.(item.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onUnfavorite?.(item.id);
+                        }}
                       >
                         Unfavorite
                       </button>
@@ -50,7 +82,10 @@ export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete })
                       <button
                         type="button"
                         className="library-card__menu-item"
-                        onClick={() => onRename?.(item.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onRename?.(item.id);
+                        }}
                       >
                         Rename
                       </button>
@@ -59,7 +94,10 @@ export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete })
                       <button
                         type="button"
                         className="library-card__menu-item"
-                        onClick={() => onDelete?.(item.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onDelete?.(item.id);
+                        }}
                       >
                         Delete
                       </button>
@@ -70,7 +108,7 @@ export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete })
             </article>
           ))
         ) : (
-          <p className="home-panel__placeholder">No favorites yet. Save a conversion to see it here.</p>
+          <p className="home-panel__placeholder">{fallbackMessage}</p>
         )}
       </div>
     </section>

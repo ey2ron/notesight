@@ -78,6 +78,20 @@
   box-shadow: 0 16px 32px rgba(48, 56, 47, 0.2);
 }
 
+.library-card--interactive {
+  cursor: pointer;
+}
+
+.library-card--interactive:focus-visible {
+  outline: 3px solid rgba(143, 185, 150, 0.7);
+  outline-offset: 3px;
+}
+
+.library-card--opening {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .library-card__thumb {
   position: relative;
   width: 100%;
@@ -261,6 +275,131 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: rgba(48, 56, 47, 0.72);
+}
+
+.library-dialog {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.library-dialog__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(24, 32, 24, 0.55);
+  backdrop-filter: blur(6px);
+}
+
+.library-dialog__panel {
+  position: relative;
+  width: min(420px, 100%);
+  border-radius: 20px;
+  padding: 1.75rem;
+  background: var(--color-surface, #ffffff);
+  box-shadow: 0 26px 52px rgba(48, 56, 47, 0.26);
+  display: grid;
+  gap: 1.1rem;
+}
+
+.library-dialog__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.library-dialog__title--danger {
+  color: #c93939;
+}
+
+.library-dialog__description {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.library-dialog__highlight {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.library-dialog__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.library-dialog__field {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.library-dialog__label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.library-dialog__input {
+  border-radius: 12px;
+  border: 1px solid rgba(48, 56, 47, 0.18);
+  padding: 0.65rem 0.85rem;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.library-dialog__input:focus-visible {
+  outline: 3px solid rgba(143, 185, 150, 0.55);
+  outline-offset: 2px;
+}
+
+.library-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
+
+.library-dialog__button {
+  min-width: 96px;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(48, 56, 47, 0.2);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--color-text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.library-dialog__button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(48, 56, 47, 0.18);
+}
+
+.library-dialog__button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.library-dialog__button--primary {
+  background: var(--color-accent, #8fb996);
+  border-color: transparent;
+  color: #fff;
+}
+
+.library-dialog__button--danger {
+  background: #c93939;
+  border-color: transparent;
+  color: #fff;
 }
 
 @media (max-width: 540px) {

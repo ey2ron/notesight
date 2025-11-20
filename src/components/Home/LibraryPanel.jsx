@@ -1,9 +1,31 @@
 import { useMemo } from "react";
 import "./HomePanels.css";
 
-export function LibraryPanel({ items = [], favorites = [], onFavorite, onUnfavorite, onRename, onDelete }) {
+export function LibraryPanel({
+  items = [],
+  favorites = [],
+  onFavorite,
+  onUnfavorite,
+  onRename,
+  onDelete,
+  onOpen,
+  emptyMessage,
+  openingItemId,
+}) {
   const hasItems = items.length > 0;
   const favoriteSet = useMemo(() => new Set(favorites), [favorites]);
+  const fallbackMessage = emptyMessage ?? "Your library is empty. Convert a score first to populate this space.";
+
+  const handleCardKeyDown = (event, item) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      onOpen?.(item);
+    }
+  };
+
+  const preventPropagation = (event) => {
+    event.stopPropagation();
+  };
 
   return (
     <section className="home-panel" aria-label="Library">
@@ -14,7 +36,18 @@ export function LibraryPanel({ items = [], favorites = [], onFavorite, onUnfavor
       <div className={`home-panel__body ${hasItems ? "home-panel__body--library" : ""}`}>
         {hasItems ? (
           items.map((item) => (
-            <article key={item.id} className="library-card" aria-label={`${item.title} file`}>
+            <article
+              key={item.id}
+              className={`library-card${onOpen ? " library-card--interactive" : ""}${
+                openingItemId === item.id ? " library-card--opening" : ""
+              }`}
+              aria-label={`${item.title} file`}
+              role={onOpen ? "button" : undefined}
+              tabIndex={onOpen ? 0 : undefined}
+              onClick={onOpen ? () => onOpen(item) : undefined}
+              onKeyDown={onOpen ? (event) => handleCardKeyDown(event, item) : undefined}
+              aria-busy={openingItemId === item.id}
+            >
               <div className="library-card__thumb" aria-hidden="true" style={{ backgroundColor: item.thumbColor }}>
                 <span className="library-card__filetype">{item.type}</span>
                 <div
@@ -34,8 +67,14 @@ export function LibraryPanel({ items = [], favorites = [], onFavorite, onUnfavor
                   <p className="library-card__title">{item.title}</p>
                   {item.lastOpened && <p className="library-card__meta">Opened {item.lastOpened}</p>}
                 </div>
-                <div className="library-card__menu" role="group" aria-label={`Options for ${item.title}`}>
-                  <button type="button" className="library-card__menu-button" aria-haspopup="true" aria-expanded="false">
+                <div className="library-card__menu" role="group" aria-label={`Options for ${item.title}`} onClick={preventPropagation}>
+                  <button
+                    type="button"
+                    className="library-card__menu-button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    onClick={preventPropagation}
+                  >
                     ⋮
                   </button>
                   <ul className="library-card__menu-list" role="menu">
@@ -43,9 +82,10 @@ export function LibraryPanel({ items = [], favorites = [], onFavorite, onUnfavor
                       <button
                         type="button"
                         className="library-card__menu-item"
-                        onClick={() =>
-                          favoriteSet.has(item.id) ? onUnfavorite?.(item.id) : onFavorite?.(item.id)
-                        }
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          favoriteSet.has(item.id) ? onUnfavorite?.(item.id) : onFavorite?.(item.id);
+                        }}
                       >
                         {favoriteSet.has(item.id) ? "Unfavorite" : "Favorite"}
                       </button>
@@ -54,7 +94,10 @@ export function LibraryPanel({ items = [], favorites = [], onFavorite, onUnfavor
                       <button
                         type="button"
                         className="library-card__menu-item"
-                        onClick={() => onRename?.(item.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onRename?.(item.id);
+                        }}
                       >
                         Rename
                       </button>
@@ -63,7 +106,10 @@ export function LibraryPanel({ items = [], favorites = [], onFavorite, onUnfavor
                       <button
                         type="button"
                         className="library-card__menu-item"
-                        onClick={() => onDelete?.(item.id)}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onDelete?.(item.id);
+                        }}
                       >
                         Delete
                       </button>
@@ -74,7 +120,7 @@ export function LibraryPanel({ items = [], favorites = [], onFavorite, onUnfavor
             </article>
           ))
         ) : (
-          <p className="home-panel__placeholder">Your library is empty. Convert a score first to populate this space.</p>
+          <p className="home-panel__placeholder">{fallbackMessage}</p>
         )}
       </div>
       {hasItems && (

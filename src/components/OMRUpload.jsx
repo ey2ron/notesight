@@ -63,6 +63,12 @@ export function OMRUpload({ layout = 'standalone', inputId = 'omr-file', backgro
     const formData = new FormData();
     formData.append('file', selectedFile);
 
+    const FALLBACK_BASE = 'audiveris-output';
+    const selectedBaseName = selectedFile.name
+      ? selectedFile.name.replace(/\.[^/.]+$/, '')
+      : '';
+    const baseName = selectedBaseName ? selectedBaseName : FALLBACK_BASE;
+
     setIsLoading(true);
     setErrorMessage('');
     setXmlResult('');
@@ -93,12 +99,12 @@ export function OMRUpload({ layout = 'standalone', inputId = 'omr-file', backgro
       const isMxlResponse = lowerName.endsWith('.mxl');
 
       let resultBlob = blob;
-      let resultFileName = suggestedName;
+      let resultFileName = `${baseName}.${isMxlResponse ? 'mxl' : 'xml'}`;
 
       if (!isMxlResponse && contentType.includes('xml')) {
         const xmlText = await blob.text();
         resultBlob = new Blob([xmlText], { type: 'application/xml' });
-        resultFileName = lowerName.endsWith('.xml') ? suggestedName : 'audiveris-output.xml';
+        resultFileName = `${baseName}.xml`;
       }
 
       setDownloadBlob(resultBlob);
@@ -117,7 +123,7 @@ export function OMRUpload({ layout = 'standalone', inputId = 'omr-file', backgro
     } catch (error) {
       setErrorMessage(error.message ?? 'Unexpected error');
       setDownloadBlob(null);
-      setDownloadFileName('audiveris-output.mxl');
+      setDownloadFileName(`${baseName}.mxl`);
     } finally {
       setIsLoading(false);
     }

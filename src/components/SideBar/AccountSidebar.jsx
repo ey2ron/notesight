@@ -66,7 +66,6 @@ export function AccountSidebar({ onBack, userData, onUserDataChange, onAvatarCha
         setIsSaving(true);
 
         let emailToPersist = trimmedEmail;
-        let emailUpdateError = null;
 
         if (auth.currentUser && trimmedName && auth.currentUser.displayName !== trimmedName) {
             try {
