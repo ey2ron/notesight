@@ -161,7 +161,7 @@ export function OMRUpload({ layout = 'standalone', inputId = 'omr-file', backgro
 
         <header className="omr-card__header">
           <p className="omr-card__eyebrow">Optical Music Recognition</p>
-          <h1 className="omr-card__title">Convert Sheet Music to MusicXML</h1>
+          <h1 className="omr-card__title">Convert Sheet Music</h1>
           <p className="omr-card__subtitle">
             Upload your score and let Audiveris deliver a clean, editable MusicXML file.
           </p>

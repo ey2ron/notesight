@@ -77,6 +77,8 @@
   gap: 0.75rem;
   margin-bottom: 2rem;
   z-index: 1;
+  justify-items: center;
+  text-align: center;
 }
 
 .omr-card__eyebrow {
@@ -89,9 +91,11 @@
 
 .omr-card__title {
   margin: 0;
-  font-size: clamp(1.9rem, 3vw, 2.6rem);
+  font-size: clamp(1.75rem, 2.6vw, 2.35rem);
   font-weight: 600;
   letter-spacing: -0.02em;
+  white-space: nowrap;
+  text-wrap: balance;
 }
 
 .omr-card__subtitle {
@@ -99,6 +103,13 @@
   max-width: 38ch;
   color: var(--color-text-secondary);
   line-height: 1.5;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .omr-card__title {
+    white-space: normal;
+  }
 }
 
 .omr-form {
@@ -106,6 +117,7 @@
   z-index: 1;
   display: grid;
   gap: 1.5rem;
+  margin-top: 1rem;
 }
 
 .omr-field {
@@ -159,7 +171,7 @@
 }
 
 .omr-submit {
-  justify-self: start;
+  justify-self: center;
   padding: 0.9rem 1.8rem;
   border-radius: 999px;
   border: none;
