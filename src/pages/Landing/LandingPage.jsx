@@ -7,6 +7,7 @@ import soundIcon from "./assets/sound.png";
 import userIcon from "./assets/user.png";
 import member3 from "./assets/pic3.jpg";
 import leader from "./assets/AaronCard.png";
+import jop from "./assets/jop.jpg";
 import "./LandingPage.css";
 
 const featureCards = [
@@ -31,20 +32,20 @@ const featureCards = [
 const teamMembers = [
   {
     name: "Jeoffrey Delos Reyes",
-    role: "Frontend Engineer",
+    role: "Frontend Dev",
     bio: "Builds intuitive interfaces so every feature feels effortless to explore.",
-    image: "/images/member2.jpg",
+    image: jop,
   },
   {
     name: "Aaron Clyde Guiruela",
-    role: "Product Lead",
-    bio: "Shapes the NoteSight roadmap and keeps every launch focused on musicians.",
+    role: "Product Lead/Fullstack Dev",
+    bio: "Leads NoteSight’s roadmap with sharp product instincts and reliable fullstack execution.",
     image: leader,
   },
   {
     name: "John Russel Gallanosa",
-    role: "Backend Engineer",
-    bio: "Delivers fast, reliable processing that turns sheet music into vivid audio.",
+    role: "UI/UX Designer",
+    bio: "Crafts intuitive NoteSight journeys so every musician feels guided, confident, and inspired.",
     image: member3,
   },
 ];
