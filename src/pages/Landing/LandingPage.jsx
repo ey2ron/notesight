@@ -6,7 +6,7 @@ import secureIcon from "./assets/secure.png";
 import soundIcon from "./assets/sound.png";
 import userIcon from "./assets/user.png";
 import member3 from "./assets/pic3.jpg";
-import leader from "./assets/AaronCard.png";
+import leader from "./assets/hahaha.jpg";
 import jop from "./assets/jop.jpg";
 import "./LandingPage.css";
 

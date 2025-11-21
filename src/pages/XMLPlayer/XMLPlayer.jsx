@@ -33,6 +33,61 @@ const ILLEGAL_STORAGE_CHARS = new Set(["#", "[", "]", "*", "?", "\\", "/"]);
 const MAX_INLINE_SCORE_BYTES = 700 * 1024; // keep inline payloads well below Firestore 1MB limit
 const THUMBNAIL_MAX_WIDTH = 320;
 const THUMBNAIL_BACKGROUND = "#ffffff";
+const GHOST_NOTE_GAIN = 0.35;
+
+function fractionToNumber(fraction) {
+  if (!fraction) {
+    return null;
+  }
+
+  if (typeof fraction.RealValue === "number") {
+    return fraction.RealValue;
+  }
+
+  const numerator =
+    typeof fraction.Numerator === "number"
+      ? fraction.Numerator
+      : typeof fraction.numerator === "number"
+        ? fraction.numerator
+        : null;
+  const denominator =
+    typeof fraction.Denominator === "number"
+      ? fraction.Denominator
+      : typeof fraction.denominator === "number"
+        ? fraction.denominator
+        : null;
+
+  if (numerator !== null && denominator !== null && denominator !== 0) {
+    return numerator / denominator;
+  }
+
+  if (typeof fraction.value === "number") {
+    return fraction.value;
+  }
+  if (typeof fraction.Value === "number") {
+    return fraction.Value;
+  }
+  if (typeof fraction.toRealValue === "function") {
+    try {
+      const value = fraction.toRealValue();
+      return typeof value === "number" && !Number.isNaN(value) ? value : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+function beatsToSeconds(beats, bpmValue) {
+  if (typeof bpmValue !== "number" || bpmValue <= 0) {
+    return 0;
+  }
+  if (typeof beats !== "number" || Number.isNaN(beats) || beats <= 0) {
+    return 0;
+  }
+  return (60 / bpmValue) * (beats * 1.75);
+}
 
 function arrayBufferToBase64(buffer) {
   if (!buffer) {
@@ -79,6 +134,62 @@ function sanitizeFileName(name) {
     }
   }
   return sanitized;
+}
+
+function isSourceNoteRest(note) {
+  return Boolean(note) && typeof note.isRest === "function" && note.isRest();
+}
+
+function hasNoteheadLikeData(note) {
+  if (!note) {
+    return false;
+  }
+
+  try {
+    const notehead = note.Notehead;
+    return Boolean(notehead && typeof notehead === "object");
+  } catch (error) {
+    return false;
+  }
+}
+
+function getHalfToneValue(note) {
+  if (!note) {
+    return null;
+  }
+
+  if (typeof note.halfTone === "number" && Number.isFinite(note.halfTone)) {
+    return note.halfTone;
+  }
+
+  try {
+    const pitch = note.Pitch;
+    if (pitch && typeof pitch.getHalfTone === "function") {
+      const pitchHalfTone = pitch.getHalfTone();
+      if (Number.isFinite(pitchHalfTone)) {
+        return pitchHalfTone;
+      }
+    }
+  } catch (error) {
+    return null;
+  }
+
+  return null;
+}
+
+function isGhostSourceNote(note) {
+  if (!isSourceNoteRest(note)) {
+    return false;
+  }
+  return hasNoteheadLikeData(note) || getHalfToneValue(note) !== null;
+}
+
+function fractionToBeats(fraction) {
+  const numeric = fractionToNumber(fraction);
+  if (numeric === null) {
+    return null;
+  }
+  return numeric * 4;
 }
 
 export function XMLPlayerPage() {
@@ -240,17 +351,19 @@ export function XMLPlayerPage() {
         moveCursorToTimestamp(timestampClone);
       }
 
-      const beatsPerSecond = bpm / 60;
-      const baseDuration = beatsPerSecond ? 1 / beatsPerSecond : 0.5;
       const lengthFraction = meta.length;
-      const noteBeats = lengthFraction && typeof lengthFraction.RealValue === "number" ? lengthFraction.RealValue : 1;
-      const durationSeconds = Math.max(0.2, baseDuration * noteBeats);
+      const noteBeats = fractionToBeats(lengthFraction) || 1;
+      const durationSeconds = Math.max(0.1, beatsToSeconds(noteBeats, bpm));
       const context = audioContextRef.current;
       const startTime = (context ? context.currentTime : 0) + 0.01;
 
       midiValues.forEach((midi) => {
         const noteName = midiToNoteName(midi);
-        instrument.play(noteName, startTime, { duration: durationSeconds });
+        const playOptions = { duration: durationSeconds };
+        if (meta.isGhost) {
+          playOptions.gain = GHOST_NOTE_GAIN;
+        }
+        instrument.play(noteName, startTime, playOptions);
       });
     },
     [bpm, clearMeasureHighlight, ensureAudioContextRunning, ensureInstrumentReady, findMeasureElementFromNode, midiToNoteName, moveCursorToTimestamp, stopPlayback]
@@ -314,7 +427,19 @@ export function XMLPlayerPage() {
         for (const voiceEntry of staffEntry.graphicalVoiceEntries) {
           if (!voiceEntry?.notes) continue;
           for (const graphicalNote of voiceEntry.notes) {
-            if (!graphicalNote || !graphicalNote.sourceNote || graphicalNote.sourceNote.isRest()) {
+            const sourceNote = graphicalNote?.sourceNote;
+            if (!graphicalNote || !sourceNote) {
+              continue;
+            }
+
+            const restLike = isSourceNoteRest(sourceNote);
+            const ghostNote = restLike && isGhostSourceNote(sourceNote);
+            if (restLike && !ghostNote) {
+              continue;
+            }
+
+            const halfTone = getHalfToneValue(sourceNote);
+            if (halfTone === null) {
               continue;
             }
 
@@ -330,21 +455,24 @@ export function XMLPlayerPage() {
               meta = {
                 midis: new Set(),
                 timestamp:
-                  typeof graphicalNote.sourceNote.getAbsoluteTimestamp === "function"
-                    ? graphicalNote.sourceNote.getAbsoluteTimestamp()
+                  typeof sourceNote.getAbsoluteTimestamp === "function"
+                    ? sourceNote.getAbsoluteTimestamp()
                     : null,
-                length: graphicalNote.sourceNote.Length || null,
-                measureElement: findMeasureElementFromNode(noteElement)
+                length: sourceNote.Length || null,
+                measureElement: findMeasureElementFromNode(noteElement),
+                isGhost: ghostNote
               };
               noteElementDataRef.current.set(noteElement, meta);
+            } else if (ghostNote) {
+              meta.isGhost = true;
             }
 
-            meta.midis.add(graphicalNote.sourceNote.halfTone + 12);
-            if (!meta.length && graphicalNote.sourceNote.Length) {
-              meta.length = graphicalNote.sourceNote.Length;
+            meta.midis.add(halfTone + 12);
+            if (!meta.length && sourceNote.Length) {
+              meta.length = sourceNote.Length;
             }
-            if (!meta.timestamp && typeof graphicalNote.sourceNote.getAbsoluteTimestamp === "function") {
-              meta.timestamp = graphicalNote.sourceNote.getAbsoluteTimestamp();
+            if (!meta.timestamp && typeof sourceNote.getAbsoluteTimestamp === "function") {
+              meta.timestamp = sourceNote.getAbsoluteTimestamp();
             }
             if (!meta.measureElement) {
               meta.measureElement = findMeasureElementFromNode(noteElement);
@@ -642,16 +770,69 @@ export function XMLPlayerPage() {
     playingRef.current = true;
 
     const playStep = () => {
-      if (!playingRef.current || cursor.iterator.endReached) {
+      const iterator = cursor.iterator;
+      if (!playingRef.current || !iterator || iterator.endReached) {
         stopPlayback();
         return;
       }
 
-      const durationMs = 60000 / bpm;
-      const durationSeconds = durationMs / 1000;
+      const voices = iterator.CurrentVoiceEntries || [];
+
+      const getShortestNoteBeats = () => {
+        let shortest = null;
+        for (const voiceEntry of voices) {
+          for (const note of voiceEntry.Notes || []) {
+            const restLike = isSourceNoteRest(note);
+            const ghostNote = restLike && isGhostSourceNote(note);
+            if (restLike && !ghostNote) {
+              continue;
+            }
+            const noteBeats = fractionToBeats(note.Length);
+            if (typeof noteBeats === "number" && noteBeats > 0 && (shortest === null || noteBeats < shortest)) {
+              shortest = noteBeats;
+            }
+          }
+        }
+        return shortest;
+      };
+
+      const getStepBeats = () => {
+        const currentTimeValue = fractionToBeats(iterator.CurrentSourceTimestamp);
+        let nextTimeValue = null;
+
+        if (typeof iterator.clone === "function") {
+          try {
+            const clone = iterator.clone();
+            if (clone && typeof clone.moveToNext === "function") {
+              clone.moveToNext();
+              nextTimeValue = fractionToBeats(clone.CurrentSourceTimestamp);
+            }
+          } catch (error) {
+            // fallback handled below
+          }
+        }
+
+        if (currentTimeValue !== null && nextTimeValue !== null) {
+          const delta = nextTimeValue - currentTimeValue;
+          if (delta > 0) {
+            return delta;
+          }
+        }
+
+        const shortest = getShortestNoteBeats();
+        if (shortest !== null && shortest > 0) {
+          return shortest;
+        }
+
+        return 1;
+      };
+
+      const stepBeats = getStepBeats();
+      const stepDurationSeconds = Math.max(0.05, beatsToSeconds(stepBeats, bpm));
+      const nextDelayMs = Math.max(1, Math.round(stepDurationSeconds * 1000));
 
       clearMeasureHighlight();
-      const measureIndex = cursor.iterator.CurrentMeasureIndex;
+      const measureIndex = iterator.CurrentMeasureIndex;
       const container = containerRef.current;
       if (container) {
         const svgMeasure = container.querySelector(`g[id^='measure'][id$='-${measureIndex}']`);
@@ -660,14 +841,30 @@ export function XMLPlayerPage() {
         }
       }
 
-      const voices = cursor.iterator.CurrentVoiceEntries || [];
       for (const voice of voices) {
         for (const note of voice.Notes || []) {
-          if (!note.isRest()) {
-            const midi = note.halfTone + 12;
-            const noteName = midiToNoteName(midi);
-            instrument.play(noteName, audioContextRef.current.currentTime, { duration: durationSeconds });
+          const restLike = isSourceNoteRest(note);
+          const ghostNote = restLike && isGhostSourceNote(note);
+          if (restLike && !ghostNote) {
+            continue;
           }
+
+          const halfTone = getHalfToneValue(note);
+          if (halfTone === null) {
+            continue;
+          }
+
+          const midi = halfTone + 12;
+          const noteName = midiToNoteName(midi);
+          const noteBeats = fractionToBeats(note.Length) || stepBeats;
+          const noteDurationSeconds = Math.max(0.05, beatsToSeconds(noteBeats, bpm));
+          const playOptions = { duration: noteDurationSeconds };
+          if (ghostNote) {
+            playOptions.gain = GHOST_NOTE_GAIN;
+          }
+          const context = audioContextRef.current;
+          const startTime = context ? context.currentTime : undefined;
+          instrument.play(noteName, startTime, playOptions);
         }
       }
 
@@ -679,7 +876,7 @@ export function XMLPlayerPage() {
         cursor.next();
         lastCursorIndexRef.current += 1;
         playStep();
-      }, durationMs);
+      }, nextDelayMs);
     };
 
     playStep();
