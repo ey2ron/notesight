@@ -82,7 +82,7 @@ function sanitizeFileName(name) {
 }
 
 export function XMLPlayerPage() {
-  const [bpm, setBpm] = useState(120);
+  const [bpm, setBpm] = useState(190);
   const [instrumentName, setInstrumentName] = useState("acoustic_grand_piano");
   const [isSavingToLibrary, setIsSavingToLibrary] = useState(false);
   const [hasLoadedScore, setHasLoadedScore] = useState(false);
