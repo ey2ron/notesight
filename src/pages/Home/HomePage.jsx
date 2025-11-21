@@ -100,6 +100,7 @@ function decorateLibraryItem(snapshot) {
     scoreData: data.scoreData || "",
     scoreMimeType: data.scoreMimeType || "",
     scoreSize: data.scoreSize || 0,
+    thumbnailData: data.thumbnailData || "",
     isFavorite: Boolean(data.isFavorite),
     type: extension,
     thumbColor: visuals.thumbColor,

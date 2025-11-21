@@ -37,17 +37,25 @@ export function FavoritesPanel({ items = [], onUnfavorite, onRename, onDelete, o
               aria-busy={openingItemId === item.id}
             >
               <div className="library-card__thumb" aria-hidden="true" style={{ backgroundColor: item.thumbColor }}>
-                <span className="library-card__filetype">{item.type}</span>
-                <div
-                  className={`library-card__preview library-card__preview--${item.previewVariant ?? "generic"}`}
-                >
-                  {item.previewGlyph && (
-                    <span className="library-card__preview-glyph" aria-hidden="true">
-                      {item.previewGlyph}
-                    </span>
-                  )}
-                  <span className="library-card__preview-label">{item.type}</span>
-                </div>
+                {item.thumbnailData ? (
+                  <img
+                    src={item.thumbnailData}
+                    alt=""
+                    loading="lazy"
+                    className="library-card__thumb-image"
+                  />
+                ) : (
+                  <div
+                    className={`library-card__preview library-card__preview--${item.previewVariant ?? "generic"}`}
+                  >
+                    {item.previewGlyph && (
+                      <span className="library-card__preview-glyph" aria-hidden="true">
+                        {item.previewGlyph}
+                      </span>
+                    )}
+                    <span className="library-card__preview-label">{item.type}</span>
+                  </div>
+                )}
                 <span className="library-card__badge" aria-label="Favorited">★</span>
               </div>
               <div className="library-card__footer">

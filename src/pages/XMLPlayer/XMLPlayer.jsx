@@ -17,20 +17,22 @@ if (typeof window !== "undefined" && !window.JSZip) {
 const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 const INSTRUMENT_OPTIONS = [
-  { label: "🎹 Piano", value: "acoustic_grand_piano" },
-  { label: "🎻 Violin", value: "violin" },
-  { label: "🎶 Flute", value: "flute" },
-  { label: "🎸 Guitar", value: "acoustic_guitar_nylon" },
-  { label: "🎷 Saxophone", value: "soprano_sax" },
-  { label: "🦴 Trombone", value: "trombone" },
-  { label: "🎻 Cello", value: "cello" }
+  { label: "Piano", value: "acoustic_grand_piano" },
+  { label: "Violin", value: "violin" },
+  { label: "Flute", value: "flute" },
+  { label: "Guitar", value: "acoustic_guitar_nylon" },
+  { label: "Saxophone", value: "soprano_sax" },
+  { label: "Trombone", value: "trombone" },
+  { label: "Cello", value: "cello" }
 ];
 
 const MIN_BPM = 30;
-const MAX_BPM = 240;
+const MAX_BPM = 360;
 const DEFAULT_SCORE_FILENAME = "audiveris-output.mxl";
 const ILLEGAL_STORAGE_CHARS = new Set(["#", "[", "]", "*", "?", "\\", "/"]);
 const MAX_INLINE_SCORE_BYTES = 700 * 1024; // keep inline payloads well below Firestore 1MB limit
+const THUMBNAIL_MAX_WIDTH = 320;
+const THUMBNAIL_BACKGROUND = "#ffffff";
 
 function arrayBufferToBase64(buffer) {
   if (!buffer) {
@@ -359,6 +361,68 @@ export function XMLPlayerPage() {
     }
   }, [findMeasureElementFromNode, handleNoteClick]);
 
+  const captureScoreThumbnail = useCallback(async () => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+
+    const container = containerRef.current;
+    if (!container) {
+      return "";
+    }
+
+    const svgElement = container.querySelector("svg");
+    if (!svgElement) {
+      return "";
+    }
+
+    try {
+      const serializer = new XMLSerializer();
+      let svgString = serializer.serializeToString(svgElement);
+      if (!svgString.includes("xmlns=")) {
+        svgString = svgString.replace(
+          /^<svg/,
+          '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"',
+        );
+      }
+
+      const svgBlob = new Blob([svgString], { type: "image/svg+xml" });
+      const svgUrl = URL.createObjectURL(svgBlob);
+
+      try {
+        const image = await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error("Unable to load score preview"));
+          img.src = svgUrl;
+        });
+
+        const targetWidth = Math.min(THUMBNAIL_MAX_WIDTH, image.width || THUMBNAIL_MAX_WIDTH);
+        const scale = image.width ? targetWidth / image.width : 1;
+        const width = Math.max(1, Math.round(image.width * scale)) || THUMBNAIL_MAX_WIDTH;
+        const height = Math.max(1, Math.round(image.height * scale)) || Math.round(targetWidth * 1.3);
+
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const context = canvas.getContext("2d");
+        if (!context) {
+          return "";
+        }
+        context.fillStyle = THUMBNAIL_BACKGROUND;
+        context.fillRect(0, 0, width, height);
+        context.drawImage(image, 0, 0, width, height);
+
+        return canvas.toDataURL("image/jpeg", 0.82);
+      } finally {
+        URL.revokeObjectURL(svgUrl);
+      }
+    } catch (error) {
+      console.warn("Failed to capture score thumbnail", error);
+      return "";
+    }
+  }, []);
+
   const checkIfScoreExists = useCallback(async (rawName) => {
     const user = auth.currentUser;
     if (!user) {
@@ -406,6 +470,7 @@ export function XMLPlayerPage() {
       stopPlayback();
       noteElementDataRef.current = new WeakMap();
       setIsAlreadyInLibrary(false);
+      setIsCheckingLibrary(false);
 
       let musicXmlContent = "";
       try {
@@ -515,6 +580,7 @@ export function XMLPlayerPage() {
         contentType: scoreMeta.mimeType || scoreMeta.file.type || "application/octet-stream",
       });
       const downloadURL = await getDownloadURL(fileRef);
+      const thumbnailData = await captureScoreThumbnail();
       const libraryCollection = collection(db, "users", user.uid, "library");
       const docRef = doc(libraryCollection);
       const now = serverTimestamp();
@@ -536,6 +602,10 @@ export function XMLPlayerPage() {
         payload.scoreMimeType = scoreMeta.mimeType || scoreMeta.file.type || "application/octet-stream";
       }
 
+      if (thumbnailData) {
+        payload.thumbnailData = thumbnailData;
+      }
+
       await setDoc(docRef, payload);
       toast.success("Score added to your library.");
       setIsAlreadyInLibrary(true);
@@ -545,7 +615,7 @@ export function XMLPlayerPage() {
     } finally {
       setIsSavingToLibrary(false);
     }
-  }, [checkIfScoreExists, currentScoreRef, isAlreadyInLibrary, isSavingToLibrary]);
+  }, [captureScoreThumbnail, checkIfScoreExists, currentScoreRef, isAlreadyInLibrary, isSavingToLibrary]);
 
   const handlePlay = useCallback(async () => {
     const osmd = osmdRef.current;

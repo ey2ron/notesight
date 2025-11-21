@@ -105,6 +105,13 @@
   overflow: hidden;
 }
 
+.library-card__thumb-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .library-card__thumb::after {
   content: "";
   position: absolute;
@@ -117,20 +124,6 @@
     transparent 20px
   );
   mix-blend-mode: multiply;
-}
-
-.library-card__filetype {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
-  z-index: 2;
-  padding: 0.3rem 0.65rem;
-  border-radius: 999px;
-  background: rgba(48, 56, 47, 0.8);
-  color: #fff;
-  font-size: 0.65rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 .library-card__title {
