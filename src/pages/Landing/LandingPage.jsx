@@ -6,7 +6,7 @@ import secureIcon from "./assets/secure.png";
 import soundIcon from "./assets/sound.png";
 import userIcon from "./assets/user.png";
 import member3 from "./assets/pic3.jpg";
-import leader from "./assets/hahaha.jpg";
+import leaders from "./assets/hahaha.jpg";
 import jop from "./assets/jop.jpg";
 import "./LandingPage.css";
 
@@ -40,7 +40,7 @@ const teamMembers = [
     name: "Aaron Clyde Guiruela",
     role: "Product Lead/Fullstack Dev",
     bio: "Leads NoteSight’s roadmap with sharp product instincts and reliable fullstack execution.",
-    image: leader,
+    image: leaders,
   },
   {
     name: "John Russel Gallanosa",
