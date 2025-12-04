@@ -551,6 +551,28 @@ export function XMLPlayerPage() {
     }
   }, []);
 
+  const waitForSheetLayout = useCallback(async () => {
+    const container = containerRef.current;
+    if (!container) {
+      return false;
+    }
+    const hasDimensions = () => (container.clientWidth ?? 0) > 0 && (container.clientHeight ?? 0) > 0;
+    if (hasDimensions()) {
+      return true;
+    }
+    // OSMD expects the target SVG container to have real dimensions; wait a few frames if flex layout is still settling.
+    const maxAttempts = 12;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50 * (attempt + 1));
+      });
+      if (hasDimensions()) {
+        return true;
+      }
+    }
+    return hasDimensions();
+  }, []);
+
   const checkIfScoreExists = useCallback(async (rawName) => {
     const user = auth.currentUser;
     if (!user) {
@@ -629,6 +651,10 @@ export function XMLPlayerPage() {
       }
 
       try {
+        const sheetReady = await waitForSheetLayout();
+        if (!sheetReady) {
+          console.warn("Score stage still sized at 0×0; attempting render regardless.");
+        }
         await osmdRef.current.load(musicXmlContent);
         osmdRef.current.render();
       } catch (err) {
@@ -655,7 +681,7 @@ export function XMLPlayerPage() {
       setHasLoadedScore(true);
       return true;
     },
-    [attachNoteClickHandlers, checkIfScoreExists, readMusicXmlFromMxl, stopPlayback]
+    [attachNoteClickHandlers, checkIfScoreExists, readMusicXmlFromMxl, stopPlayback, waitForSheetLayout]
   );
 
   const handleAddToLibrary = useCallback(async () => {
