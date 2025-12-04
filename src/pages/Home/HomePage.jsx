@@ -6,8 +6,8 @@ import { FavoritesPanel } from "../../components/Home/FavoritesPanel"
 import { LibraryPanel } from "../../components/Home/LibraryPanel"
 import "./HomePage.css"
 import HomeBg from "../Landing/assets/BG.png"
-import { auth, db, storage } from "../Auth/firebase.jsx"
-import { onAuthStateChanged } from "firebase/auth"
+import { db, storage } from "../Auth/firebase.jsx"
+import { useAuth } from "../../context/AuthContext"
 import {
   collection,
   deleteDoc,
@@ -117,7 +117,6 @@ export function HomePage() {
   const fileInputId = "home-omr-file"
   const [activePanel, setActivePanel] = useState("favorites")
   const [libraryItems, setLibraryItems] = useState([])
-  const [currentUser, setCurrentUser] = useState(null)
   const [isLibraryLoading, setIsLibraryLoading] = useState(true)
   const [openingItemId, setOpeningItemId] = useState(null)
   const [renameTarget, setRenameTarget] = useState(null)
@@ -126,15 +125,13 @@ export function HomePage() {
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const navigate = useNavigate()
+  const { user: currentUser, isLoading: isAuthLoading } = useAuth()
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setCurrentUser(firebaseUser)
-    })
-    return unsubscribe
-  }, [])
+    if (isAuthLoading) {
+      return undefined
+    }
 
-  useEffect(() => {
     if (!currentUser) {
       setLibraryItems([])
       setIsLibraryLoading(false)
@@ -160,7 +157,7 @@ export function HomePage() {
     )
 
     return unsubscribe
-  }, [currentUser])
+  }, [currentUser, isAuthLoading])
 
   const handleSectionChange = useCallback((section) => {
     setActivePanel(section)
