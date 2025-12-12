@@ -6,33 +6,48 @@ import { useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { toast } from "react-toastify";
 import { auth, googleProvider } from "./firebase.jsx";
+import { sendOtp } from "./twoFactorService.js";
 import InstantAudioPlaybackIcon from "./assets/InstantAudioPlayback.png";
 import CuttingEdgeIcon from "./assets/CuttingEdge.png";
 import InclusiveLearningIcon from "./assets/InclusiveLearning.png";
 import AdjustableTempoIcon from "./assets/AdjustableTempo.png";
 
-
 export function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         
         try {
+            // First verify credentials with Firebase (without completing login)
             await signInWithEmailAndPassword(auth, email, password);
-            navigate("/home", { replace: true });
-      console.log("Logged in user:");
-      toast.success("Login successful!", {
-        position: "top-left",
-      });
+            // Sign out immediately - we'll complete login after 2FA
+            await auth.signOut();
+
+            // Send 2FA code via EmailJS
+            const result = await sendOtp(email);
+
+            if (result.success) {
+                toast.info("Verification code sent to your email", {
+                    position: "top-left",
+                });
+                navigate("/verify", { state: { email, password } });
+            } else {
+                toast.error(result.message || "Failed to send verification code", {
+                    position: "top-left",
+                });
+            }
         } catch (error) {
-            
             console.error("Error during login:", error.message);
-      toast.error(`Login failed: ${error.message}`, {
-        position: "top-left",
-      });
+            toast.error(`Login failed: ${error.message}`, {
+                position: "top-left",
+            });
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -74,8 +89,8 @@ export function LoginPage() {
           <p className="redirect">
             Don’t have an account? <Link to="/signup">Sign up here</Link>
           </p>
-          <button type="submit" className="auth-btn">
-            <FiArrowRight />
+          <button type="submit" className="auth-btn" disabled={isLoading}>
+            {isLoading ? "..." : <FiArrowRight />}
           </button>
         </form>
 
