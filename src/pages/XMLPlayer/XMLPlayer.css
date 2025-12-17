@@ -214,11 +214,14 @@
   }
 
   .xmlplayer__controls {
-    gap: 20px;
+    gap: 18px;
+    padding: 16px;
+    border-radius: 18px;
+    bottom: 12px;
   }
 
   .xmlplayer__controls-group {
-    gap: 14px;
+    gap: 12px;
     flex-direction: column;
     align-items: stretch;
   }
@@ -229,18 +232,142 @@
     min-width: unset;
   }
 
+  .xmlplayer__field-label {
+    font-size: 0.8rem;
+  }
+
+  .xmlplayer__field select,
+  .xmlplayer__field input[type="range"] {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    border-radius: 10px;
+  }
+
   .xmlplayer__buttons {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
   }
 
   .xmlplayer__button {
-    width: 100%;
+    flex: 1 1 calc(50% - 5px);
+    min-width: 0;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    border-radius: 12px;
+  }
+
+  .xmlplayer__button--library {
+    flex: 1 1 100%;
   }
 }
 
+/* Extra small phones (480px and down) */
 @media (max-width: 480px) {
+  .xmlplayer {
+    padding: 12px;
+    gap: 12px;
+    min-height: 100dvh;
+  }
+
+  .xmlplayer__header {
+    gap: 12px;
+  }
+
+  .xmlplayer__back {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    align-self: flex-start;
+  }
+
+  .xmlplayer__sheet {
+    min-height: 45vh;
+    max-height: 55vh;
+    padding: 12px;
+    border-radius: 14px;
+  }
+
+  .xmlplayer__controls {
+    gap: 14px;
+    padding: 14px;
+    border-radius: 16px;
+    bottom: 10px;
+    box-shadow: 0 12px 28px rgba(48, 56, 47, 0.18);
+  }
+
+  .xmlplayer__controls-group {
+    gap: 10px;
+  }
+
+  .xmlplayer__field {
+    gap: 4px;
+  }
+
+  .xmlplayer__field-label {
+    font-size: 0.75rem;
+  }
+
+  .xmlplayer__field select,
+  .xmlplayer__field input[type="range"] {
+    padding: 0.45rem;
+    font-size: 0.85rem;
+    border-radius: 8px;
+  }
+
+  .xmlplayer__buttons {
+    gap: 8px;
+  }
+
+  .xmlplayer__button {
+    padding: 0.55rem 0.8rem;
+    font-size: 0.8rem;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(48, 56, 47, 0.16);
+  }
+}
+
+/* Ultra small phones (360px and down) */
+@media (max-width: 360px) {
+  .xmlplayer {
+    padding: 10px;
+    gap: 10px;
+  }
+
   .xmlplayer__sheet {
     min-height: 40vh;
-    padding: 16px;
+    max-height: 50vh;
+    padding: 10px;
+    border-radius: 12px;
+  }
+
+  .xmlplayer__controls {
+    padding: 12px;
+    gap: 12px;
+    border-radius: 14px;
+    bottom: 8px;
+  }
+
+  .xmlplayer__field-label {
+    font-size: 0.7rem;
+  }
+
+  .xmlplayer__field select,
+  .xmlplayer__field input[type="range"] {
+    padding: 0.4rem;
+    font-size: 0.8rem;
+  }
+
+  .xmlplayer__buttons {
+    gap: 6px;
+  }
+
+  .xmlplayer__button {
+    padding: 0.5rem 0.7rem;
+    font-size: 0.75rem;
+    flex: 1 1 calc(50% - 3px);
+  }
+
+  .xmlplayer__button--library {
+    flex: 1 1 100%;
   }
 }
